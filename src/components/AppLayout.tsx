@@ -1,15 +1,18 @@
 import { Link, useNavigate, useLocation } from "@tanstack/react-router";
-import { Calendar, Utensils, Dumbbell, Sparkles, Film, LogOut, Moon, Heart } from "lucide-react";
+import { Calendar, Utensils, Dumbbell, Sparkles, Film, LogOut, Moon, Heart, Music2, Music } from "lucide-react";
 import { updateState } from "@/lib/storage";
 import { speak } from "@/lib/voice";
 import { WaterReminder } from "./WaterReminder";
+import { MicGate } from "./MicGate";
 
 const links = [
   { to: "/app", label: "Home", icon: Heart },
-  { to: "/app/calendar", label: "Calendar", icon: Calendar },
+  { to: "/app/calendar", label: "Cycle", icon: Calendar },
   { to: "/app/meals", label: "Meals", icon: Utensils },
   { to: "/app/exercise", label: "Yoga", icon: Dumbbell },
+  { to: "/app/dance", label: "Dance", icon: Music2 },
   { to: "/app/thoughts", label: "Thoughts", icon: Sparkles },
+  { to: "/app/music", label: "Music", icon: Music },
   { to: "/app/reels", label: "Reels", icon: Film },
 ] as const;
 
@@ -25,6 +28,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen pb-24">
+      <MicGate welcome={`Welcome back to Luna Flow. So happy to see you again.`} />
+
       <header className="sticky top-0 z-40 glass border-b border-border/50">
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
           <Link to="/app" className="flex items-center gap-2">

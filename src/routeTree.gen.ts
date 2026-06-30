@@ -17,8 +17,10 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AppThoughtsRouteImport } from './routes/app.thoughts'
 import { Route as AppReelsRouteImport } from './routes/app.reels'
+import { Route as AppMusicRouteImport } from './routes/app.music'
 import { Route as AppMealsRouteImport } from './routes/app.meals'
 import { Route as AppExerciseRouteImport } from './routes/app.exercise'
+import { Route as AppDanceRouteImport } from './routes/app.dance'
 import { Route as AppCalendarRouteImport } from './routes/app.calendar'
 
 const SignupRoute = SignupRouteImport.update({
@@ -61,6 +63,11 @@ const AppReelsRoute = AppReelsRouteImport.update({
   path: '/reels',
   getParentRoute: () => AppRoute,
 } as any)
+const AppMusicRoute = AppMusicRouteImport.update({
+  id: '/music',
+  path: '/music',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppMealsRoute = AppMealsRouteImport.update({
   id: '/meals',
   path: '/meals',
@@ -69,6 +76,11 @@ const AppMealsRoute = AppMealsRouteImport.update({
 const AppExerciseRoute = AppExerciseRouteImport.update({
   id: '/exercise',
   path: '/exercise',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppDanceRoute = AppDanceRouteImport.update({
+  id: '/dance',
+  path: '/dance',
   getParentRoute: () => AppRoute,
 } as any)
 const AppCalendarRoute = AppCalendarRouteImport.update({
@@ -84,8 +96,10 @@ export interface FileRoutesByFullPath {
   '/onboarding': typeof OnboardingRoute
   '/signup': typeof SignupRoute
   '/app/calendar': typeof AppCalendarRoute
+  '/app/dance': typeof AppDanceRoute
   '/app/exercise': typeof AppExerciseRoute
   '/app/meals': typeof AppMealsRoute
+  '/app/music': typeof AppMusicRoute
   '/app/reels': typeof AppReelsRoute
   '/app/thoughts': typeof AppThoughtsRoute
   '/app/': typeof AppIndexRoute
@@ -96,8 +110,10 @@ export interface FileRoutesByTo {
   '/onboarding': typeof OnboardingRoute
   '/signup': typeof SignupRoute
   '/app/calendar': typeof AppCalendarRoute
+  '/app/dance': typeof AppDanceRoute
   '/app/exercise': typeof AppExerciseRoute
   '/app/meals': typeof AppMealsRoute
+  '/app/music': typeof AppMusicRoute
   '/app/reels': typeof AppReelsRoute
   '/app/thoughts': typeof AppThoughtsRoute
   '/app': typeof AppIndexRoute
@@ -110,8 +126,10 @@ export interface FileRoutesById {
   '/onboarding': typeof OnboardingRoute
   '/signup': typeof SignupRoute
   '/app/calendar': typeof AppCalendarRoute
+  '/app/dance': typeof AppDanceRoute
   '/app/exercise': typeof AppExerciseRoute
   '/app/meals': typeof AppMealsRoute
+  '/app/music': typeof AppMusicRoute
   '/app/reels': typeof AppReelsRoute
   '/app/thoughts': typeof AppThoughtsRoute
   '/app/': typeof AppIndexRoute
@@ -125,8 +143,10 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/signup'
     | '/app/calendar'
+    | '/app/dance'
     | '/app/exercise'
     | '/app/meals'
+    | '/app/music'
     | '/app/reels'
     | '/app/thoughts'
     | '/app/'
@@ -137,8 +157,10 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/signup'
     | '/app/calendar'
+    | '/app/dance'
     | '/app/exercise'
     | '/app/meals'
+    | '/app/music'
     | '/app/reels'
     | '/app/thoughts'
     | '/app'
@@ -150,8 +172,10 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/signup'
     | '/app/calendar'
+    | '/app/dance'
     | '/app/exercise'
     | '/app/meals'
+    | '/app/music'
     | '/app/reels'
     | '/app/thoughts'
     | '/app/'
@@ -223,6 +247,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppReelsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/music': {
+      id: '/app/music'
+      path: '/music'
+      fullPath: '/app/music'
+      preLoaderRoute: typeof AppMusicRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/meals': {
       id: '/app/meals'
       path: '/meals'
@@ -237,6 +268,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppExerciseRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/dance': {
+      id: '/app/dance'
+      path: '/dance'
+      fullPath: '/app/dance'
+      preLoaderRoute: typeof AppDanceRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/calendar': {
       id: '/app/calendar'
       path: '/calendar'
@@ -249,8 +287,10 @@ declare module '@tanstack/react-router' {
 
 interface AppRouteChildren {
   AppCalendarRoute: typeof AppCalendarRoute
+  AppDanceRoute: typeof AppDanceRoute
   AppExerciseRoute: typeof AppExerciseRoute
   AppMealsRoute: typeof AppMealsRoute
+  AppMusicRoute: typeof AppMusicRoute
   AppReelsRoute: typeof AppReelsRoute
   AppThoughtsRoute: typeof AppThoughtsRoute
   AppIndexRoute: typeof AppIndexRoute
@@ -258,8 +298,10 @@ interface AppRouteChildren {
 
 const AppRouteChildren: AppRouteChildren = {
   AppCalendarRoute: AppCalendarRoute,
+  AppDanceRoute: AppDanceRoute,
   AppExerciseRoute: AppExerciseRoute,
   AppMealsRoute: AppMealsRoute,
+  AppMusicRoute: AppMusicRoute,
   AppReelsRoute: AppReelsRoute,
   AppThoughtsRoute: AppThoughtsRoute,
   AppIndexRoute: AppIndexRoute,
@@ -277,12 +319,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}

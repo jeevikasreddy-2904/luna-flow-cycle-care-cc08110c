@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { primeVoices, speak } from "@/lib/voice";
 import { updateState, type Profile } from "@/lib/storage";
-import { ArrowRight, Phone, Mail, User as UserIcon, CheckCircle2 } from "lucide-react";
+import { ArrowRight, Phone, User as UserIcon, CheckCircle2 } from "lucide-react";
 
 export const Route = createFileRoute("/signup")({
   head: () => ({
@@ -14,7 +14,7 @@ export const Route = createFileRoute("/signup")({
   component: Signup,
 });
 
-type Step = "details" | "phone" | "phone-otp" | "email" | "email-otp" | "done";
+type Step = "details" | "phone" | "phone-otp" | "done";
 
 function Signup() {
   const navigate = useNavigate();
@@ -79,22 +79,7 @@ function Signup() {
 
           {step === "phone-otp" && (
             <>
-              <p className="text-sm text-muted-foreground">Enter the 6-digit code (demo: any 6 digits work)</p>
-              <Field label="OTP" value={otp} onChange={setOtp} placeholder="••••••" />
-              <NextBtn disabled={otp.length < 4} onClick={() => { setOtp(""); setStep("email"); }}>Verify phone</NextBtn>
-            </>
-          )}
-
-          {step === "email" && (
-            <>
-              <Field icon={<Mail className="h-4 w-4" />} label="Email address" type="email" value={profile.email} onChange={(v) => update("email", v)} placeholder="you@bloom.com" />
-              <NextBtn disabled={!profile.email.includes("@")} onClick={() => { setStep("email-otp"); speak("We sent an O T P to your email."); }}>Send OTP</NextBtn>
-            </>
-          )}
-
-          {step === "email-otp" && (
-            <>
-              <p className="text-sm text-muted-foreground">Enter the 6-digit code (demo: any 6 digits work)</p>
+              <p className="text-sm text-muted-foreground">Enter the 6-digit code sent to your mobile (demo: any 4+ digits)</p>
               <Field label="OTP" value={otp} onChange={setOtp} placeholder="••••••" />
               <NextBtn
                 disabled={otp.length < 4}
@@ -102,9 +87,10 @@ function Signup() {
                   updateState({ profile, loggedIn: true });
                   setStep("done");
                 }}
-              >Verify email</NextBtn>
+              >Verify & finish</NextBtn>
             </>
           )}
+
 
           {step === "done" && (
             <div className="text-center py-6">

@@ -1,8 +1,8 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { Moon, Sparkles, Heart } from "lucide-react";
-import { primeVoices, speak } from "@/lib/voice";
 import { loadState } from "@/lib/storage";
+import { MicGate } from "@/components/MicGate";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -20,15 +20,14 @@ function Landing() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    primeVoices();
-    const t = setTimeout(() => speak("Welcome to Luna Flow. Your gentle companion for a healthy cycle."), 600);
     const s = loadState();
     if (s.loggedIn) navigate({ to: "/app" });
-    return () => clearTimeout(t);
   }, [navigate]);
 
   return (
     <div className="min-h-screen relative overflow-hidden">
+      <MicGate welcome="Welcome to Luna Flow. Your gentle companion for a healthy cycle." />
+
       {/* floating blobs */}
       <div className="absolute -top-20 -left-10 h-72 w-72 rounded-full bg-pink/60 blur-3xl animate-float" />
       <div className="absolute top-40 -right-10 h-80 w-80 rounded-full bg-lavender/60 blur-3xl animate-float" style={{ animationDelay: "2s" }} />

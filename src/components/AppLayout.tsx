@@ -1,7 +1,7 @@
 import { Link, useNavigate, useLocation } from "@tanstack/react-router";
-import { Calendar, Utensils, Dumbbell, Sparkles, Film, LogOut, Moon, Heart, Music2, Music } from "lucide-react";
+import { Calendar, Utensils, Dumbbell, Sparkles, Film, LogOut, Moon, Heart, Music2, Music, Settings, Ambulance } from "lucide-react";
 import { updateState } from "@/lib/storage";
-import { speak } from "@/lib/voice";
+import { speak, clearMicGrant } from "@/lib/voice";
 import { WaterReminder } from "./WaterReminder";
 import { MicGate } from "./MicGate";
 
@@ -14,6 +14,8 @@ const links = [
   { to: "/app/thoughts", label: "Thoughts", icon: Sparkles },
   { to: "/app/music", label: "Music", icon: Music },
   { to: "/app/reels", label: "Reels", icon: Film },
+  { to: "/app/settings", label: "Me", icon: Settings },
+  { to: "/app/emergency", label: "SOS", icon: Ambulance },
 ] as const;
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
@@ -23,6 +25,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const handleLogout = () => {
     updateState({ loggedIn: false });
     speak("See you soon, take care of yourself.");
+    clearMicGrant();
     navigate({ to: "/" });
   };
 

@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { loadState, updateState, BADGES, currentBadge } from "@/lib/storage";
-import { speak } from "@/lib/voice";
+import { loadState, updateState } from "@/lib/storage";
+import { speak, BADGES, currentBadge } from "@/lib/voice";
 import { Snowflake, Flame, Check } from "lucide-react";
 
 export const Route = createFileRoute("/app/settings")({

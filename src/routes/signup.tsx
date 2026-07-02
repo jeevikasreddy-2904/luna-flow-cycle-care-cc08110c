@@ -14,13 +14,14 @@ export const Route = createFileRoute("/signup")({
   component: Signup,
 });
 
-type Step = "details" | "phone" | "phone-otp" | "done";
+type Step = "details" | "health" | "phone" | "phone-otp" | "done";
 
 function Signup() {
   const navigate = useNavigate();
   const [step, setStep] = useState<Step>("details");
   const [profile, setProfile] = useState<Profile>({
     name: "", age: "", occupation: "", dob: "", phone: "", email: "",
+    place: "", allergies: "", healthConditions: "",
   });
   const [otp, setOtp] = useState("");
 

@@ -64,10 +64,32 @@ function Signup() {
                 </div>
               </div>
               <Field label="Date of birth" type="date" value={profile.dob} onChange={(v) => update("dob", v)} />
+              <Field label="Place / City" value={profile.place ?? ""} onChange={(v) => update("place", v)} placeholder="Bengaluru, India" />
               <NextBtn
-                disabled={!profile.name || !profile.age || !profile.occupation || !profile.dob}
-                onClick={() => setStep("phone")}
+                disabled={!profile.name || !profile.age || !profile.occupation || !profile.dob || !profile.place}
+                onClick={() => setStep("health")}
               >Continue</NextBtn>
+            </>
+          )}
+
+          {step === "health" && (
+            <>
+              <p className="text-sm text-muted-foreground">
+                Any allergies or health conditions? This helps Luna set a <b>safe protein range</b> for your body.
+              </p>
+              <Field
+                label="Allergies (type any)"
+                value={profile.allergies ?? ""}
+                onChange={(v) => update("allergies", v)}
+                placeholder="e.g., peanuts, dairy, soy, eggs, none"
+              />
+              <Field
+                label="Health conditions"
+                value={profile.healthConditions ?? ""}
+                onChange={(v) => update("healthConditions", v)}
+                placeholder="e.g., PCOS, anemia, kidney issue, none"
+              />
+              <NextBtn onClick={() => setStep("phone")}>Continue</NextBtn>
             </>
           )}
 

@@ -16,10 +16,12 @@ import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AppThoughtsRouteImport } from './routes/app.thoughts'
+import { Route as AppSettingsRouteImport } from './routes/app.settings'
 import { Route as AppReelsRouteImport } from './routes/app.reels'
 import { Route as AppMusicRouteImport } from './routes/app.music'
 import { Route as AppMealsRouteImport } from './routes/app.meals'
 import { Route as AppExerciseRouteImport } from './routes/app.exercise'
+import { Route as AppEmergencyRouteImport } from './routes/app.emergency'
 import { Route as AppDanceRouteImport } from './routes/app.dance'
 import { Route as AppCalendarRouteImport } from './routes/app.calendar'
 
@@ -58,6 +60,11 @@ const AppThoughtsRoute = AppThoughtsRouteImport.update({
   path: '/thoughts',
   getParentRoute: () => AppRoute,
 } as any)
+const AppSettingsRoute = AppSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppReelsRoute = AppReelsRouteImport.update({
   id: '/reels',
   path: '/reels',
@@ -76,6 +83,11 @@ const AppMealsRoute = AppMealsRouteImport.update({
 const AppExerciseRoute = AppExerciseRouteImport.update({
   id: '/exercise',
   path: '/exercise',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppEmergencyRoute = AppEmergencyRouteImport.update({
+  id: '/emergency',
+  path: '/emergency',
   getParentRoute: () => AppRoute,
 } as any)
 const AppDanceRoute = AppDanceRouteImport.update({
@@ -97,10 +109,12 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/app/calendar': typeof AppCalendarRoute
   '/app/dance': typeof AppDanceRoute
+  '/app/emergency': typeof AppEmergencyRoute
   '/app/exercise': typeof AppExerciseRoute
   '/app/meals': typeof AppMealsRoute
   '/app/music': typeof AppMusicRoute
   '/app/reels': typeof AppReelsRoute
+  '/app/settings': typeof AppSettingsRoute
   '/app/thoughts': typeof AppThoughtsRoute
   '/app/': typeof AppIndexRoute
 }
@@ -111,10 +125,12 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/app/calendar': typeof AppCalendarRoute
   '/app/dance': typeof AppDanceRoute
+  '/app/emergency': typeof AppEmergencyRoute
   '/app/exercise': typeof AppExerciseRoute
   '/app/meals': typeof AppMealsRoute
   '/app/music': typeof AppMusicRoute
   '/app/reels': typeof AppReelsRoute
+  '/app/settings': typeof AppSettingsRoute
   '/app/thoughts': typeof AppThoughtsRoute
   '/app': typeof AppIndexRoute
 }
@@ -127,10 +143,12 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/app/calendar': typeof AppCalendarRoute
   '/app/dance': typeof AppDanceRoute
+  '/app/emergency': typeof AppEmergencyRoute
   '/app/exercise': typeof AppExerciseRoute
   '/app/meals': typeof AppMealsRoute
   '/app/music': typeof AppMusicRoute
   '/app/reels': typeof AppReelsRoute
+  '/app/settings': typeof AppSettingsRoute
   '/app/thoughts': typeof AppThoughtsRoute
   '/app/': typeof AppIndexRoute
 }
@@ -144,10 +162,12 @@ export interface FileRouteTypes {
     | '/signup'
     | '/app/calendar'
     | '/app/dance'
+    | '/app/emergency'
     | '/app/exercise'
     | '/app/meals'
     | '/app/music'
     | '/app/reels'
+    | '/app/settings'
     | '/app/thoughts'
     | '/app/'
   fileRoutesByTo: FileRoutesByTo
@@ -158,10 +178,12 @@ export interface FileRouteTypes {
     | '/signup'
     | '/app/calendar'
     | '/app/dance'
+    | '/app/emergency'
     | '/app/exercise'
     | '/app/meals'
     | '/app/music'
     | '/app/reels'
+    | '/app/settings'
     | '/app/thoughts'
     | '/app'
   id:
@@ -173,10 +195,12 @@ export interface FileRouteTypes {
     | '/signup'
     | '/app/calendar'
     | '/app/dance'
+    | '/app/emergency'
     | '/app/exercise'
     | '/app/meals'
     | '/app/music'
     | '/app/reels'
+    | '/app/settings'
     | '/app/thoughts'
     | '/app/'
   fileRoutesById: FileRoutesById
@@ -240,6 +264,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppThoughtsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/settings': {
+      id: '/app/settings'
+      path: '/settings'
+      fullPath: '/app/settings'
+      preLoaderRoute: typeof AppSettingsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/reels': {
       id: '/app/reels'
       path: '/reels'
@@ -268,6 +299,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppExerciseRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/emergency': {
+      id: '/app/emergency'
+      path: '/emergency'
+      fullPath: '/app/emergency'
+      preLoaderRoute: typeof AppEmergencyRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/dance': {
       id: '/app/dance'
       path: '/dance'
@@ -288,10 +326,12 @@ declare module '@tanstack/react-router' {
 interface AppRouteChildren {
   AppCalendarRoute: typeof AppCalendarRoute
   AppDanceRoute: typeof AppDanceRoute
+  AppEmergencyRoute: typeof AppEmergencyRoute
   AppExerciseRoute: typeof AppExerciseRoute
   AppMealsRoute: typeof AppMealsRoute
   AppMusicRoute: typeof AppMusicRoute
   AppReelsRoute: typeof AppReelsRoute
+  AppSettingsRoute: typeof AppSettingsRoute
   AppThoughtsRoute: typeof AppThoughtsRoute
   AppIndexRoute: typeof AppIndexRoute
 }
@@ -299,10 +339,12 @@ interface AppRouteChildren {
 const AppRouteChildren: AppRouteChildren = {
   AppCalendarRoute: AppCalendarRoute,
   AppDanceRoute: AppDanceRoute,
+  AppEmergencyRoute: AppEmergencyRoute,
   AppExerciseRoute: AppExerciseRoute,
   AppMealsRoute: AppMealsRoute,
   AppMusicRoute: AppMusicRoute,
   AppReelsRoute: AppReelsRoute,
+  AppSettingsRoute: AppSettingsRoute,
   AppThoughtsRoute: AppThoughtsRoute,
   AppIndexRoute: AppIndexRoute,
 }

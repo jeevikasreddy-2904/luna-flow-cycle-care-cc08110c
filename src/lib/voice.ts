@@ -77,6 +77,12 @@ export function speak(text: string, opts: { rate?: number; pitch?: number; force
     u.rate = opts.rate ?? 1.02;
     u.pitch = opts.pitch ?? 1.4; // higher pitch → reads as young girl
     window.speechSynthesis.speak(u);
+  } catch {
+    // ignore
+  }
+}
+
+
 
 export function primeVoices() {
   if (typeof window === "undefined" || !("speechSynthesis" in window)) return;

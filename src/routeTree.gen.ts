@@ -26,6 +26,7 @@ import { Route as AppEmergencyRouteImport } from './routes/app.emergency'
 import { Route as AppDanceRouteImport } from './routes/app.dance'
 import { Route as AppCalendarRouteImport } from './routes/app.calendar'
 import { Route as AppPregnancyIndexRouteImport } from './routes/app.pregnancy.index'
+import { Route as AppPregnancyOnboardingRouteImport } from './routes/app.pregnancy.onboarding'
 
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
@@ -112,6 +113,11 @@ const AppPregnancyIndexRoute = AppPregnancyIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppPregnancyRoute,
 } as any)
+const AppPregnancyOnboardingRoute = AppPregnancyOnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
+  getParentRoute: () => AppPregnancyRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -130,6 +136,7 @@ export interface FileRoutesByFullPath {
   '/app/settings': typeof AppSettingsRoute
   '/app/thoughts': typeof AppThoughtsRoute
   '/app/': typeof AppIndexRoute
+  '/app/pregnancy/onboarding': typeof AppPregnancyOnboardingRoute
   '/app/pregnancy/': typeof AppPregnancyIndexRoute
 }
 export interface FileRoutesByTo {
@@ -147,6 +154,7 @@ export interface FileRoutesByTo {
   '/app/settings': typeof AppSettingsRoute
   '/app/thoughts': typeof AppThoughtsRoute
   '/app': typeof AppIndexRoute
+  '/app/pregnancy/onboarding': typeof AppPregnancyOnboardingRoute
   '/app/pregnancy': typeof AppPregnancyIndexRoute
 }
 export interface FileRoutesById {
@@ -167,6 +175,7 @@ export interface FileRoutesById {
   '/app/settings': typeof AppSettingsRoute
   '/app/thoughts': typeof AppThoughtsRoute
   '/app/': typeof AppIndexRoute
+  '/app/pregnancy/onboarding': typeof AppPregnancyOnboardingRoute
   '/app/pregnancy/': typeof AppPregnancyIndexRoute
 }
 export interface FileRouteTypes {
@@ -188,6 +197,7 @@ export interface FileRouteTypes {
     | '/app/settings'
     | '/app/thoughts'
     | '/app/'
+    | '/app/pregnancy/onboarding'
     | '/app/pregnancy/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -205,6 +215,7 @@ export interface FileRouteTypes {
     | '/app/settings'
     | '/app/thoughts'
     | '/app'
+    | '/app/pregnancy/onboarding'
     | '/app/pregnancy'
   id:
     | '__root__'
@@ -224,6 +235,7 @@ export interface FileRouteTypes {
     | '/app/settings'
     | '/app/thoughts'
     | '/app/'
+    | '/app/pregnancy/onboarding'
     | '/app/pregnancy/'
   fileRoutesById: FileRoutesById
 }
@@ -356,14 +368,23 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppPregnancyIndexRouteImport
       parentRoute: typeof AppPregnancyRoute
     }
+    '/app/pregnancy/onboarding': {
+      id: '/app/pregnancy/onboarding'
+      path: '/onboarding'
+      fullPath: '/app/pregnancy/onboarding'
+      preLoaderRoute: typeof AppPregnancyOnboardingRouteImport
+      parentRoute: typeof AppPregnancyRoute
+    }
   }
 }
 
 interface AppPregnancyRouteChildren {
+  AppPregnancyOnboardingRoute: typeof AppPregnancyOnboardingRoute
   AppPregnancyIndexRoute: typeof AppPregnancyIndexRoute
 }
 
 const AppPregnancyRouteChildren: AppPregnancyRouteChildren = {
+  AppPregnancyOnboardingRoute: AppPregnancyOnboardingRoute,
   AppPregnancyIndexRoute: AppPregnancyIndexRoute,
 }
 

@@ -2,14 +2,14 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { loadState, updateState } from "@/lib/storage";
 import { speak, BADGES, currentBadge } from "@/lib/voice";
-import { Snowflake, Flame, Check } from "lucide-react";
+import { Snowflake, Flame, Check, Pencil, Save, Lock, ShieldCheck, KeyRound } from "lucide-react";
+import { PinLock } from "@/components/PinLock";
 
 export const Route = createFileRoute("/app/settings")({
   head: () => ({ meta: [{ title: "Settings — Luna Flow" }] }),
   component: SettingsPage,
 });
 
-// Avatar options — emoji-based girl avatars (no external network dependency).
 const AVATARS = [
   { id: "girl-1", emoji: "👧🏻", bg: "bg-pink" },
   { id: "girl-2", emoji: "👧🏽", bg: "bg-peach" },
@@ -27,9 +27,20 @@ const AVATARS = [
 
 function SettingsPage() {
   const [s, setS] = useState(() => loadState());
+  const [unlocked, setUnlocked] = useState(false);
+  const [showPinModal, setShowPinModal] = useState<null | "create" | "verify" | "change">(null);
+  const [editing, setEditing] = useState(false);
+  const [form, setForm] = useState({
+    name: s.profile?.name ?? "",
+    place: s.profile?.place ?? "",
+    phone: s.profile?.phone ?? "",
+  });
+
   const badge = currentBadge(s.streak);
+  const currentAvatar = AVATARS.find((a) => a.id === s.profile?.avatar) ?? AVATARS[0];
 
   const chooseAvatar = (id: string) => {
+    if (!unlocked) { setShowPinModal(s.pin ? "verify" : "create"); return; }
     const next = updateState({
       profile: { ...(s.profile ?? { name: "", age: "", occupation: "" as const, dob: "", phone: "", email: "" }), avatar: id },
     });
@@ -37,15 +48,66 @@ function SettingsPage() {
     speak("Avatar updated. You look lovely.");
   };
 
-  const currentAvatar = AVATARS.find((a) => a.id === s.profile?.avatar) ?? AVATARS[0];
+  const startEdit = () => {
+    if (!unlocked) { setShowPinModal(s.pin ? "verify" : "create"); return; }
+    setEditing(true);
+  };
+
+  const saveEdits = () => {
+    const next = updateState({
+      profile: {
+        ...(s.profile ?? { name: "", age: "", occupation: "" as const, dob: "", phone: "", email: "" }),
+        name: form.name.trim(),
+        place: form.place.trim(),
+        phone: form.phone.trim(),
+      },
+    });
+    setS(next);
+    setEditing(false);
+    speak("Your details are saved.");
+  };
+
+  const onPinSuccess = (pin: string) => {
+    if (showPinModal === "create") {
+      const next = updateState({ pin });
+      setS(next);
+    } else if (showPinModal === "change") {
+      const next = updateState({ pin });
+      setS(next);
+      speak("Your pin has been changed.");
+    }
+    setShowPinModal(null);
+    setUnlocked(true);
+  };
 
   return (
     <div className="space-y-6">
+      {/* Lock banner */}
+      {!unlocked && (
+        <div className="glass shadow-soft rounded-[2rem] p-5 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="h-11 w-11 rounded-2xl bg-gradient-primary grid place-items-center">
+              <Lock className="h-5 w-5 text-primary-foreground" />
+            </div>
+            <div>
+              <p className="font-display font-extrabold">Settings are locked</p>
+              <p className="text-xs text-muted-foreground">{s.pin ? "Enter your 4-digit PIN to edit." : "Create a 4-digit PIN to protect your settings."}</p>
+            </div>
+          </div>
+          <button
+            onClick={() => setShowPinModal(s.pin ? "verify" : "create")}
+            className="rounded-full bg-gradient-primary text-primary-foreground font-bold px-4 py-2 text-sm shadow-soft"
+          >
+            {s.pin ? "Unlock" : "Set PIN"}
+          </button>
+        </div>
+      )}
+
       <div className="glass shadow-soft rounded-[2rem] p-6 flex items-center gap-5">
         <div className={`h-24 w-24 rounded-full ${currentAvatar.bg} grid place-items-center text-6xl shadow-glow border-4 border-white`}>
           {currentAvatar.emoji}
         </div>
-        <div>
+        <div className="flex-1">
           <h1 className="font-display text-3xl font-extrabold">{s.profile?.name || "Beautiful you"}</h1>
           <p className="text-muted-foreground">{s.profile?.email || s.profile?.phone || "Luna Flow member"}</p>
           <div className="mt-2 flex items-center gap-3 text-sm">
@@ -54,6 +116,51 @@ function SettingsPage() {
           </div>
         </div>
       </div>
+
+      {/* Editable details */}
+      <section className="glass shadow-soft rounded-[2rem] p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="font-display text-xl font-extrabold">Personal details</h2>
+          {editing ? (
+            <button onClick={saveEdits} className="flex items-center gap-1.5 rounded-full bg-gradient-primary text-primary-foreground font-bold px-4 py-2 text-sm shadow-soft">
+              <Save className="h-4 w-4" /> Save
+            </button>
+          ) : (
+            <button onClick={startEdit} className="flex items-center gap-1.5 rounded-full bg-white/80 hover:bg-white font-bold px-4 py-2 text-sm shadow-soft">
+              <Pencil className="h-4 w-4" /> Edit
+            </button>
+          )}
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-3">
+          <EditField label="Name" value={form.name} editing={editing} onChange={(v) => setForm((f) => ({ ...f, name: v }))} />
+          <EditField label="Place" value={form.place} editing={editing} onChange={(v) => setForm((f) => ({ ...f, place: v }))} />
+          <EditField label="Phone" value={form.phone} editing={editing} onChange={(v) => setForm((f) => ({ ...f, phone: v }))} />
+        </div>
+      </section>
+
+      {/* PIN management */}
+      <section className="glass shadow-soft rounded-[2rem] p-6 flex items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="h-11 w-11 rounded-2xl bg-lavender grid place-items-center">
+            <KeyRound className="h-5 w-5" />
+          </div>
+          <div>
+            <p className="font-display font-extrabold">Security PIN</p>
+            <p className="text-xs text-muted-foreground">{s.pin ? "Your settings are protected." : "No PIN set yet."}</p>
+          </div>
+        </div>
+        <button
+          onClick={() => {
+            if (!s.pin) setShowPinModal("create");
+            else if (!unlocked) setShowPinModal("verify");
+            else setShowPinModal("change");
+          }}
+          className="rounded-full bg-white/80 hover:bg-white font-bold px-4 py-2 text-sm shadow-soft"
+        >
+          {s.pin ? (unlocked ? "Change PIN" : "Unlock") : "Set PIN"}
+        </button>
+      </section>
 
       <section className="glass shadow-soft rounded-[2rem] p-6">
         <h2 className="font-display text-xl font-extrabold mb-1">Pick your avatar</h2>
@@ -113,16 +220,46 @@ function SettingsPage() {
       </section>
 
       <section className="glass shadow-soft rounded-[2rem] p-6">
-        <h2 className="font-display text-xl font-extrabold mb-3">Your details</h2>
+        <h2 className="font-display text-xl font-extrabold mb-3">Other info</h2>
         <dl className="grid grid-cols-2 gap-3 text-sm">
           <Info label="Age" value={s.profile?.age} />
           <Info label="DOB" value={s.profile?.dob} />
-          <Info label="Place" value={s.profile?.place} />
           <Info label="Occupation" value={s.profile?.occupation} />
+          <Info label="Email" value={s.profile?.email} />
           <Info label="Allergies" value={s.profile?.allergies || "None"} full />
           <Info label="Health conditions" value={s.profile?.healthConditions || "None"} full />
         </dl>
+        <div className="mt-4 flex items-center gap-2 text-xs text-emerald-700">
+          <ShieldCheck className="h-4 w-4" /> Your data lives only on this device.
+        </div>
       </section>
+
+      {showPinModal && (
+        <PinLock
+          mode={showPinModal === "verify" ? "verify" : "create"}
+          existingPin={s.pin}
+          title={showPinModal === "change" ? "Set a new PIN" : undefined}
+          onSuccess={onPinSuccess}
+          onCancel={() => setShowPinModal(null)}
+        />
+      )}
+    </div>
+  );
+}
+
+function EditField({ label, value, editing, onChange }: { label: string; value: string; editing: boolean; onChange: (v: string) => void }) {
+  return (
+    <div className="rounded-2xl bg-white/70 p-3">
+      <p className="text-[10px] font-bold text-muted-foreground tracking-widest">{label.toUpperCase()}</p>
+      {editing ? (
+        <input
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="mt-1 w-full rounded-xl bg-white border-2 border-transparent focus:border-primary outline-none px-2 py-1.5 font-semibold"
+        />
+      ) : (
+        <p className="font-semibold mt-0.5">{value || "—"}</p>
+      )}
     </div>
   );
 }

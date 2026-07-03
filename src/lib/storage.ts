@@ -24,6 +24,14 @@ export type Onboarding = {
 
 export type Meal = { breakfast: string; lunch: string; dinner: string; protein: number };
 
+export type PregnancyInfo = {
+  monthsMissed: number;
+  symptoms: Record<string, boolean>;
+  startedAt: string; // ISO datetime when onboarding completed
+};
+
+export type AppMode = "period" | "pregnancy";
+
 export type AppState = {
   profile?: Profile;
   onboarding?: Onboarding;
@@ -33,6 +41,9 @@ export type AppState = {
   lastLogDate?: string;
   streakFreezers: number; // up to 2
   loggedIn: boolean;
+  pin?: string; // 4-digit PIN for settings lock
+  mode: AppMode;
+  pregnancy?: PregnancyInfo;
 };
 
 const KEY = "lunaflow_state_v1";
@@ -43,6 +54,7 @@ const empty: AppState = {
   streak: 0,
   streakFreezers: 2,
   loggedIn: false,
+  mode: "period",
 };
 
 export function loadState(): AppState {
@@ -207,7 +219,7 @@ export function estimateProteinFromText(text: string): number {
 // ---------- Safe protein intake ----------
 // Base ~0.8 g/kg body weight. Without weight we estimate from age & occupation.
 // Cap lower for kidney/liver related conditions.
-export function safeProteinRange(profile?: Profile): { min: number; max: number; note: string } {
+export function safeProteinRange(profile?: Profile, mode: AppMode = "period"): { min: number; max: number; note: string } {
   const age = Number(profile?.age) || 25;
   const occ = profile?.occupation ?? "";
   const health = (profile?.healthConditions ?? "").toLowerCase();
@@ -223,6 +235,14 @@ export function safeProteinRange(profile?: Profile): { min: number; max: number;
   if (occ === "working" || occ === "student") max += 5;
 
   const notes: string[] = [];
+
+  if (mode === "pregnancy") {
+    // Recommended for pregnancy ~1.1 g/kg → ~71g/day baseline, higher upper cap
+    min = Math.max(min, 71);
+    max = Math.max(max, 100);
+    notes.push("pregnancy — extra protein for baby's growth");
+  }
+
   if (/kidney|renal|ckd/.test(health)) { max = Math.min(max, 40); min = Math.min(min, 30); notes.push("kidney care — keep protein gentle"); }
   if (/liver|hepatic/.test(health)) { max = Math.min(max, 45); notes.push("liver care — moderate protein"); }
   if (/pcos|pcod/.test(health)) { min += 5; notes.push("PCOS — steady protein helps hormones"); }

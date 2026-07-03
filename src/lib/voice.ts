@@ -9,21 +9,27 @@ function pickFemaleVoice(): SpeechSynthesisVoice | null {
   if (typeof window === "undefined" || !("speechSynthesis" in window)) return null;
   const voices = window.speechSynthesis.getVoices();
   if (!voices.length) return null;
+
+  // Exclude anything that reads male.
+  const isMale = (v: SpeechSynthesisVoice) =>
+    /male|man\b|david|mark|guy|alex|daniel|fred|george|thomas|ryan|william|james|paul|bruce/i.test(v.name);
+
   const preferred = [
     "Google UK English Female",
-    "Google US English",
     "Microsoft Aria Online (Natural) - English (United States)",
     "Microsoft Jenny Online (Natural) - English (United States)",
     "Samantha",
-    "Victoria",
     "Karen",
+    "Victoria",
+    "Tessa",
+    "Google US English",
   ];
   for (const name of preferred) {
-    const v = voices.find((x) => x.name === name);
+    const v = voices.find((x) => x.name === name && !isMale(x));
     if (v) return v;
   }
-  const female = voices.find((v) => /female|woman|samantha|victoria|karen|zira|aria|jenny|lily/i.test(v.name));
-  return female ?? voices.find((v) => v.lang.startsWith("en")) ?? voices[0];
+  const female = voices.find((v) => !isMale(v) && /female|woman|girl|samantha|victoria|karen|zira|aria|jenny|lily|amy|emma/i.test(v.name));
+  return female ?? voices.find((v) => !isMale(v) && v.lang.startsWith("en")) ?? voices.find((v) => !isMale(v)) ?? voices[0];
 }
 
 export function micGranted(): boolean {
@@ -68,13 +74,15 @@ export function speak(text: string, opts: { rate?: number; pitch?: number; force
     const u = new SpeechSynthesisUtterance(text);
     if (!cachedVoice) cachedVoice = pickFemaleVoice();
     if (cachedVoice) u.voice = cachedVoice;
-    u.rate = opts.rate ?? 0.95;
-    u.pitch = opts.pitch ?? 1.15;
+    u.rate = opts.rate ?? 1.02;
+    u.pitch = opts.pitch ?? 1.4; // higher pitch → reads as young girl
     window.speechSynthesis.speak(u);
   } catch {
     // ignore
   }
 }
+
+
 
 export function primeVoices() {
   if (typeof window === "undefined" || !("speechSynthesis" in window)) return;

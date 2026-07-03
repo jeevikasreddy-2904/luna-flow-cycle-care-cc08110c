@@ -18,12 +18,16 @@ import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AppThoughtsRouteImport } from './routes/app.thoughts'
 import { Route as AppSettingsRouteImport } from './routes/app.settings'
 import { Route as AppReelsRouteImport } from './routes/app.reels'
+import { Route as AppPregnancyRouteImport } from './routes/app.pregnancy'
 import { Route as AppMusicRouteImport } from './routes/app.music'
 import { Route as AppMealsRouteImport } from './routes/app.meals'
 import { Route as AppExerciseRouteImport } from './routes/app.exercise'
 import { Route as AppEmergencyRouteImport } from './routes/app.emergency'
 import { Route as AppDanceRouteImport } from './routes/app.dance'
 import { Route as AppCalendarRouteImport } from './routes/app.calendar'
+import { Route as AppPregnancyIndexRouteImport } from './routes/app.pregnancy.index'
+import { Route as AppPregnancyOnboardingRouteImport } from './routes/app.pregnancy.onboarding'
+import { Route as AppPregnancyMealsRouteImport } from './routes/app.pregnancy.meals'
 
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
@@ -70,6 +74,11 @@ const AppReelsRoute = AppReelsRouteImport.update({
   path: '/reels',
   getParentRoute: () => AppRoute,
 } as any)
+const AppPregnancyRoute = AppPregnancyRouteImport.update({
+  id: '/pregnancy',
+  path: '/pregnancy',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppMusicRoute = AppMusicRouteImport.update({
   id: '/music',
   path: '/music',
@@ -100,6 +109,21 @@ const AppCalendarRoute = AppCalendarRouteImport.update({
   path: '/calendar',
   getParentRoute: () => AppRoute,
 } as any)
+const AppPregnancyIndexRoute = AppPregnancyIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppPregnancyRoute,
+} as any)
+const AppPregnancyOnboardingRoute = AppPregnancyOnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
+  getParentRoute: () => AppPregnancyRoute,
+} as any)
+const AppPregnancyMealsRoute = AppPregnancyMealsRouteImport.update({
+  id: '/meals',
+  path: '/meals',
+  getParentRoute: () => AppPregnancyRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -113,10 +137,14 @@ export interface FileRoutesByFullPath {
   '/app/exercise': typeof AppExerciseRoute
   '/app/meals': typeof AppMealsRoute
   '/app/music': typeof AppMusicRoute
+  '/app/pregnancy': typeof AppPregnancyRouteWithChildren
   '/app/reels': typeof AppReelsRoute
   '/app/settings': typeof AppSettingsRoute
   '/app/thoughts': typeof AppThoughtsRoute
   '/app/': typeof AppIndexRoute
+  '/app/pregnancy/meals': typeof AppPregnancyMealsRoute
+  '/app/pregnancy/onboarding': typeof AppPregnancyOnboardingRoute
+  '/app/pregnancy/': typeof AppPregnancyIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -133,6 +161,9 @@ export interface FileRoutesByTo {
   '/app/settings': typeof AppSettingsRoute
   '/app/thoughts': typeof AppThoughtsRoute
   '/app': typeof AppIndexRoute
+  '/app/pregnancy/meals': typeof AppPregnancyMealsRoute
+  '/app/pregnancy/onboarding': typeof AppPregnancyOnboardingRoute
+  '/app/pregnancy': typeof AppPregnancyIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -147,10 +178,14 @@ export interface FileRoutesById {
   '/app/exercise': typeof AppExerciseRoute
   '/app/meals': typeof AppMealsRoute
   '/app/music': typeof AppMusicRoute
+  '/app/pregnancy': typeof AppPregnancyRouteWithChildren
   '/app/reels': typeof AppReelsRoute
   '/app/settings': typeof AppSettingsRoute
   '/app/thoughts': typeof AppThoughtsRoute
   '/app/': typeof AppIndexRoute
+  '/app/pregnancy/meals': typeof AppPregnancyMealsRoute
+  '/app/pregnancy/onboarding': typeof AppPregnancyOnboardingRoute
+  '/app/pregnancy/': typeof AppPregnancyIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -166,10 +201,14 @@ export interface FileRouteTypes {
     | '/app/exercise'
     | '/app/meals'
     | '/app/music'
+    | '/app/pregnancy'
     | '/app/reels'
     | '/app/settings'
     | '/app/thoughts'
     | '/app/'
+    | '/app/pregnancy/meals'
+    | '/app/pregnancy/onboarding'
+    | '/app/pregnancy/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -186,6 +225,9 @@ export interface FileRouteTypes {
     | '/app/settings'
     | '/app/thoughts'
     | '/app'
+    | '/app/pregnancy/meals'
+    | '/app/pregnancy/onboarding'
+    | '/app/pregnancy'
   id:
     | '__root__'
     | '/'
@@ -199,10 +241,14 @@ export interface FileRouteTypes {
     | '/app/exercise'
     | '/app/meals'
     | '/app/music'
+    | '/app/pregnancy'
     | '/app/reels'
     | '/app/settings'
     | '/app/thoughts'
     | '/app/'
+    | '/app/pregnancy/meals'
+    | '/app/pregnancy/onboarding'
+    | '/app/pregnancy/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -278,6 +324,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppReelsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/pregnancy': {
+      id: '/app/pregnancy'
+      path: '/pregnancy'
+      fullPath: '/app/pregnancy'
+      preLoaderRoute: typeof AppPregnancyRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/music': {
       id: '/app/music'
       path: '/music'
@@ -320,8 +373,45 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppCalendarRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/pregnancy/': {
+      id: '/app/pregnancy/'
+      path: '/'
+      fullPath: '/app/pregnancy/'
+      preLoaderRoute: typeof AppPregnancyIndexRouteImport
+      parentRoute: typeof AppPregnancyRoute
+    }
+    '/app/pregnancy/onboarding': {
+      id: '/app/pregnancy/onboarding'
+      path: '/onboarding'
+      fullPath: '/app/pregnancy/onboarding'
+      preLoaderRoute: typeof AppPregnancyOnboardingRouteImport
+      parentRoute: typeof AppPregnancyRoute
+    }
+    '/app/pregnancy/meals': {
+      id: '/app/pregnancy/meals'
+      path: '/meals'
+      fullPath: '/app/pregnancy/meals'
+      preLoaderRoute: typeof AppPregnancyMealsRouteImport
+      parentRoute: typeof AppPregnancyRoute
+    }
   }
 }
+
+interface AppPregnancyRouteChildren {
+  AppPregnancyMealsRoute: typeof AppPregnancyMealsRoute
+  AppPregnancyOnboardingRoute: typeof AppPregnancyOnboardingRoute
+  AppPregnancyIndexRoute: typeof AppPregnancyIndexRoute
+}
+
+const AppPregnancyRouteChildren: AppPregnancyRouteChildren = {
+  AppPregnancyMealsRoute: AppPregnancyMealsRoute,
+  AppPregnancyOnboardingRoute: AppPregnancyOnboardingRoute,
+  AppPregnancyIndexRoute: AppPregnancyIndexRoute,
+}
+
+const AppPregnancyRouteWithChildren = AppPregnancyRoute._addFileChildren(
+  AppPregnancyRouteChildren,
+)
 
 interface AppRouteChildren {
   AppCalendarRoute: typeof AppCalendarRoute
@@ -330,6 +420,7 @@ interface AppRouteChildren {
   AppExerciseRoute: typeof AppExerciseRoute
   AppMealsRoute: typeof AppMealsRoute
   AppMusicRoute: typeof AppMusicRoute
+  AppPregnancyRoute: typeof AppPregnancyRouteWithChildren
   AppReelsRoute: typeof AppReelsRoute
   AppSettingsRoute: typeof AppSettingsRoute
   AppThoughtsRoute: typeof AppThoughtsRoute
@@ -343,6 +434,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppExerciseRoute: AppExerciseRoute,
   AppMealsRoute: AppMealsRoute,
   AppMusicRoute: AppMusicRoute,
+  AppPregnancyRoute: AppPregnancyRouteWithChildren,
   AppReelsRoute: AppReelsRoute,
   AppSettingsRoute: AppSettingsRoute,
   AppThoughtsRoute: AppThoughtsRoute,
@@ -361,12 +453,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}

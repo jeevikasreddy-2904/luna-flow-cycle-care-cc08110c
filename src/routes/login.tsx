@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { primeVoices, speak } from "@/lib/voice";
 import { loadState, updateState } from "@/lib/storage";
 import { Phone, Mail, ArrowRight } from "lucide-react";
+import { PinLock } from "@/components/PinLock";
 
 export const Route = createFileRoute("/login")({
   head: () => ({
@@ -14,7 +15,7 @@ export const Route = createFileRoute("/login")({
   component: Login,
 });
 
-type Step = "id" | "otp";
+type Step = "id" | "otp" | "pin";
 
 function Login() {
   const navigate = useNavigate();
@@ -24,6 +25,16 @@ function Login() {
   const [otp, setOtp] = useState("");
 
   useEffect(() => { primeVoices(); }, []);
+
+  const completeLogin = () => {
+    const s = loadState();
+    updateState({
+      loggedIn: true,
+      profile: s.profile ?? { name: "Friend", age: "", occupation: "", dob: "", phone: mode === "phone" ? value : "", email: mode === "email" ? value : "" },
+    });
+    speak("You have successfully logged in. Welcome back to Luna Flow.");
+    setTimeout(() => navigate({ to: "/app" }), 1200);
+  };
 
   return (
     <div className="min-h-screen grid place-items-center px-4 py-10">
@@ -86,15 +97,28 @@ function Login() {
               disabled={otp.length < 4}
               onClick={() => {
                 const s = loadState();
-                updateState({ loggedIn: true, profile: s.profile ?? { name: "Friend", age: "", occupation: "", dob: "", phone: mode === "phone" ? value : "", email: mode === "email" ? value : "" } });
-                speak("You have successfully logged in. Welcome back to Luna Flow.");
-                setTimeout(() => navigate({ to: "/app" }), 1500);
+                if (s.pin) {
+                  setStep("pin");
+                } else {
+                  completeLogin();
+                }
               }}
               className="mt-5 w-full rounded-2xl bg-gradient-primary text-primary-foreground font-bold py-3.5 shadow-soft hover:shadow-glow transition disabled:opacity-40"
             >
-              Login
+              Continue
             </button>
           </>
+        )}
+
+        {step === "pin" && (
+          <PinLock
+            mode="verify"
+            existingPin={loadState().pin}
+            title="Enter your Luna PIN"
+            subtitle="One more step to keep your journey safe."
+            onSuccess={() => completeLogin()}
+            onCancel={() => setStep("otp")}
+          />
         )}
 
         <p className="text-center text-sm text-muted-foreground mt-6">
@@ -104,3 +128,4 @@ function Login() {
     </div>
   );
 }
+

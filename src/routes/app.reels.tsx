@@ -1,87 +1,123 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
-import { Heart, MessageCircle, Send, Bookmark, Play, Pause, Music2, Volume2, VolumeX } from "lucide-react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Heart, MessageCircle, Send, Bookmark, Play, Pause, Music2, Volume2, VolumeX, Timer, ChevronUp } from "lucide-react";
+import { speak } from "@/lib/voice";
 
 export const Route = createFileRoute("/app/reels")({
   head: () => ({ meta: [{ title: "Reels — Luna Flow" }] }),
   component: ReelsPage,
 });
 
-const reels = [
-  { id: 1, user: "@cycle.coach",  title: "5 yoga poses to ease cramps 🧘🏽‍♀️", gradient: "bg-gradient-sunrise", emoji: "🧘🏽‍♀️", likes: 2310, caption: "Save this for your next period!",     song: "Soft Bloom · Luna",     src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" },
-  { id: 2, user: "@nourish.her",  title: "Iron-rich foods for your period 🥗", gradient: "bg-gradient-meadow",  emoji: "🥗",      likes: 1890, caption: "Your plate is your medicine.",     song: "Warm Embrace · Luna",   src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" },
-  { id: 3, user: "@hormone.hub",  title: "Why you crave chocolate 🍫",         gradient: "bg-gradient-dreamy",  emoji: "🍫",      likes: 4200, caption: "Spoiler: it's magnesium!",         song: "Moonlit Cycle · Luna",  src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" },
-  { id: 4, user: "@flow.stories", title: "My first period story 💕",            gradient: "bg-gradient-primary", emoji: "💕",      likes: 5670, caption: "Real talk, real love.",            song: "Cramp Soother · Luna",  src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3" },
-  { id: 5, user: "@self.care.club", title: "Period self-care night routine 🛁", gradient: "bg-gradient-sunrise", emoji: "🛁",      likes: 3120, caption: "Soft girl era, activated.",        song: "Bloom Beat · Luna",     src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3" },
-  { id: 6, user: "@move.gentle", title: "10-min walk during cramps 🚶🏽‍♀️",       gradient: "bg-gradient-meadow",  emoji: "🚶🏽‍♀️",  likes: 1540, caption: "Movement is medicine.",            song: "Dance Drift · Luna",    src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3" },
+const REELS = [
+  { id: 1, user: "@cycle.coach",   title: "5 yoga poses to ease cramps",   gradient: "bg-gradient-sunrise", emoji: "🧘🏽‍♀️", likes: 2310, caption: "Save this for your next period!",     song: "Soft Bloom · Luna",     src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" },
+  { id: 2, user: "@nourish.her",   title: "Iron-rich foods for your period", gradient: "bg-gradient-meadow",  emoji: "🥗",     likes: 1890, caption: "Your plate is your medicine.",       song: "Warm Embrace · Luna",   src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" },
+  { id: 3, user: "@hormone.hub",   title: "Why you crave chocolate",        gradient: "bg-gradient-dreamy",  emoji: "🍫",     likes: 4200, caption: "Spoiler: it's magnesium!",           song: "Moonlit Cycle · Luna",  src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" },
+  { id: 4, user: "@flow.stories",  title: "My first period story",           gradient: "bg-gradient-primary", emoji: "💕",     likes: 5670, caption: "Real talk, real love.",              song: "Cramp Soother · Luna",  src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3" },
+  { id: 5, user: "@self.care.club",title: "Period self-care night routine",  gradient: "bg-gradient-sunrise", emoji: "🛁",     likes: 3120, caption: "Soft girl era, activated.",          song: "Bloom Beat · Luna",     src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3" },
+  { id: 6, user: "@move.gentle",   title: "10-min walk during cramps",       gradient: "bg-gradient-meadow",  emoji: "🚶🏽‍♀️", likes: 1540, caption: "Movement is medicine.",             song: "Dance Drift · Luna",    src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3" },
 ];
 
-type Reel = typeof reels[number];
+type Reel = typeof REELS[number];
+
+const SESSION_SECONDS = 15 * 60; // 15 minutes
 
 function ReelsPage() {
-  const [pageLiked, setPageLiked] = useState(false);
-  const [playingId, setPlayingId] = useState<number | null>(null);
+  const navigate = useNavigate();
+  const [activeId, setActiveId] = useState<number>(REELS[0].id);
   const [muted, setMuted] = useState(false);
+  const [remaining, setRemaining] = useState(SESSION_SECONDS);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const scrollerRef = useRef<HTMLDivElement | null>(null);
 
-  useEffect(() => () => { audioRef.current?.pause(); }, []);
-
-  const playMusic = (r: Reel) => {
-    if (playingId === r.id) {
+  // countdown timer
+  useEffect(() => {
+    const iv = setInterval(() => setRemaining((r) => Math.max(0, r - 1)), 1000);
+    return () => clearInterval(iv);
+  }, []);
+  useEffect(() => {
+    if (remaining === 0) {
       audioRef.current?.pause();
-      setPlayingId(null);
-      return;
+      speak("Time to take a break, love. Heading back to your home.");
+      navigate({ to: "/app" });
     }
+  }, [remaining, navigate]);
+
+  // observe which reel is in view → auto-play its music
+  useEffect(() => {
+    const scroller = scrollerRef.current;
+    if (!scroller) return;
+    const els = scroller.querySelectorAll<HTMLElement>("[data-reel-id]");
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting && e.intersectionRatio > 0.6) {
+            const id = Number(e.target.getAttribute("data-reel-id"));
+            setActiveId(id);
+          }
+        }
+      },
+      { root: scroller, threshold: [0.6] },
+    );
+    els.forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, []);
+
+  // whenever active reel changes → swap audio
+  useEffect(() => {
+    const reel = REELS.find((r) => r.id === activeId);
+    if (!reel) return;
     audioRef.current?.pause();
-    const a = new Audio(r.src);
+    const a = new Audio(reel.src);
     a.loop = true;
     a.volume = muted ? 0 : 0.6;
     a.play().catch(() => {});
     audioRef.current = a;
-    setPlayingId(r.id);
-  };
+    return () => { a.pause(); };
+  }, [activeId]);
 
-  const toggleMute = () => {
-    setMuted((m) => {
-      if (audioRef.current) audioRef.current.volume = m ? 0.6 : 0;
-      return !m;
-    });
-  };
+  useEffect(() => {
+    if (audioRef.current) audioRef.current.volume = muted ? 0 : 0.6;
+  }, [muted]);
+
+  useEffect(() => () => { audioRef.current?.pause(); }, []);
+
+  const mm = Math.floor(remaining / 60).toString().padStart(2, "0");
+  const ss = (remaining % 60).toString().padStart(2, "0");
 
   return (
-    <div className="space-y-6">
-      <div className="glass shadow-soft rounded-[2rem] p-6 flex items-start justify-between gap-4">
-        <div>
-          <h1 className="font-display text-3xl font-extrabold">Stories & Reels 🎀</h1>
-          <p className="text-muted-foreground mt-1">Bite-sized wisdom — tap a reel to play its music.</p>
+    <div className="fixed inset-0 z-30 bg-black">
+      {/* top overlay */}
+      <div className="absolute top-0 left-0 right-0 z-20 p-3 flex items-center justify-between pointer-events-none">
+        <div className="pointer-events-auto glass rounded-full px-3 py-1.5 flex items-center gap-1.5 text-xs font-bold text-foreground">
+          <Timer className="h-3.5 w-3.5" /> {mm}:{ss}
         </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={toggleMute}
-            className="rounded-full bg-white/80 hover:bg-white p-2 shadow-soft"
-            aria-label={muted ? "Unmute" : "Mute"}
-          >
-            {muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
-          </button>
-          <button
-            onClick={() => setPageLiked((v) => !v)}
-            className={`rounded-full px-3 py-2 shadow-soft text-sm font-bold flex items-center gap-1.5 ${pageLiked ? "bg-destructive text-destructive-foreground" : "bg-white/80 hover:bg-white"}`}
-          >
-            <Heart className={`h-4 w-4 ${pageLiked ? "fill-current" : ""}`} /> {pageLiked ? "Loved" : "Love this page"}
-          </button>
-        </div>
+        <button
+          onClick={() => setMuted((m) => !m)}
+          className="pointer-events-auto glass rounded-full p-2 shadow-soft"
+          aria-label={muted ? "Unmute" : "Mute"}
+        >
+          {muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+        </button>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-        {reels.map((r) => (
-          <ReelCard key={r.id} reel={r} playing={playingId === r.id} onTogglePlay={() => playMusic(r)} />
+      {/* scroll hint */}
+      <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-20 text-white/70 text-xs font-bold flex flex-col items-center gap-0.5 animate-bounce pointer-events-none">
+        <ChevronUp className="h-4 w-4" /> swipe up
+      </div>
+
+      <div
+        ref={scrollerRef}
+        className="h-full w-full overflow-y-scroll snap-y snap-mandatory scroll-smooth no-scrollbar"
+      >
+        {REELS.map((r) => (
+          <ReelSlide key={r.id} reel={r} active={activeId === r.id} />
         ))}
       </div>
     </div>
   );
 }
 
-function ReelCard({ reel, playing, onTogglePlay }: { reel: Reel; playing: boolean; onTogglePlay: () => void }) {
+function ReelSlide({ reel, active }: { reel: Reel; active: boolean }) {
   const [liked, setLiked] = useState(false);
   const [saved, setSaved] = useState(false);
   const [showComments, setShowComments] = useState(false);
@@ -97,62 +133,75 @@ function ReelCard({ reel, playing, onTogglePlay }: { reel: Reel; playing: boolea
   };
 
   return (
-    <div className="rounded-3xl overflow-hidden shadow-soft glass">
-      <div className={`${reel.gradient} aspect-[9/14] relative grid place-items-center text-7xl`}>
-        <span className={playing ? "animate-pulse-soft" : "animate-float"}>{reel.emoji}</span>
-        <div className="absolute top-3 left-3 right-3 flex items-center gap-2">
-          <div className="h-7 w-7 rounded-full bg-white/80 grid place-items-center text-xs font-bold">
-            {reel.user[1].toUpperCase()}
-          </div>
-          <span className="text-xs font-bold text-foreground bg-white/70 rounded-full px-2 py-0.5">{reel.user}</span>
-        </div>
-        <button onClick={onTogglePlay} className="absolute inset-0 grid place-items-center group">
-          <span className="h-14 w-14 rounded-full bg-white/85 grid place-items-center shadow-glow group-hover:scale-110 transition">
-            {playing ? <Pause className="h-6 w-6 fill-foreground text-foreground" /> : <Play className="h-6 w-6 fill-foreground text-foreground" />}
-          </span>
-        </button>
-        <div className="absolute right-2 bottom-3 flex flex-col gap-3">
-          <button onClick={() => setLiked(!liked)} className="grid place-items-center">
-            <Heart className={`h-6 w-6 ${liked ? "fill-destructive text-destructive" : "text-foreground"}`} />
-          </button>
-          <button onClick={() => setShowComments((v) => !v)} className="grid place-items-center"><MessageCircle className="h-6 w-6 text-foreground" /></button>
-          <button className="grid place-items-center"><Send className="h-6 w-6 text-foreground" /></button>
-          <button onClick={() => setSaved(!saved)} className="grid place-items-center">
-            <Bookmark className={`h-6 w-6 ${saved ? "fill-foreground text-foreground" : "text-foreground"}`} />
-          </button>
-        </div>
-        <div className="absolute left-3 bottom-3 right-14 flex items-center gap-1.5 text-[11px] font-bold text-foreground bg-white/70 rounded-full px-2 py-1 w-fit max-w-full">
-          <Music2 className="h-3 w-3 shrink-0" />
-          <span className={`truncate ${playing ? "animate-pulse-soft" : ""}`}>{reel.song}</span>
-        </div>
-      </div>
-      <div className="p-3">
-        <p className="font-display font-extrabold text-sm leading-tight">{reel.title}</p>
-        <p className="text-xs text-muted-foreground mt-1">{reel.caption}</p>
-        <p className="text-xs text-muted-foreground mt-1">{(reel.likes + (liked ? 1 : 0)).toLocaleString()} likes · {comments.length} comments</p>
+    <section
+      data-reel-id={reel.id}
+      className={`snap-start h-full w-full relative grid place-items-center ${reel.gradient}`}
+    >
+      <span className={`text-[10rem] drop-shadow ${active ? "animate-pulse-soft" : "animate-float"}`}>{reel.emoji}</span>
 
-        {showComments && (
-          <div className="mt-3 space-y-2">
-            <div className="max-h-32 overflow-y-auto space-y-1.5 pr-1">
-              {comments.map((c, i) => (
-                <div key={i} className="text-xs bg-white/70 rounded-2xl px-3 py-1.5">
-                  <span className="font-bold">{c.user}</span> <span className="text-foreground/80">{c.text}</span>
-                </div>
-              ))}
-            </div>
-            <div className="flex gap-1.5">
-              <input
-                value={draft}
-                onChange={(e) => setDraft(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && submit()}
-                placeholder="Add a comment…"
-                className="flex-1 rounded-full bg-white/80 outline-none px-3 py-1.5 text-xs font-semibold focus:ring-2 focus:ring-primary"
-              />
-              <button onClick={submit} className="rounded-full bg-gradient-primary text-primary-foreground px-3 text-xs font-bold">Post</button>
-            </div>
-          </div>
-        )}
+      {/* user chip */}
+      <div className="absolute top-16 left-4 right-20 flex items-center gap-2">
+        <div className="h-9 w-9 rounded-full bg-white/85 grid place-items-center text-sm font-extrabold">
+          {reel.user[1].toUpperCase()}
+        </div>
+        <div>
+          <p className="text-sm font-extrabold text-foreground bg-white/70 rounded-full px-2 py-0.5 w-fit">{reel.user}</p>
+        </div>
       </div>
-    </div>
+
+      {/* right actions */}
+      <div className="absolute right-3 bottom-40 flex flex-col items-center gap-5">
+        <button onClick={() => setLiked((v) => !v)} className="grid place-items-center text-white">
+          <Heart className={`h-8 w-8 drop-shadow ${liked ? "fill-destructive text-destructive" : ""}`} />
+          <span className="text-[10px] font-bold mt-0.5">{(reel.likes + (liked ? 1 : 0)).toLocaleString()}</span>
+        </button>
+        <button onClick={() => setShowComments(true)} className="grid place-items-center text-white">
+          <MessageCircle className="h-8 w-8 drop-shadow" />
+          <span className="text-[10px] font-bold mt-0.5">{comments.length}</span>
+        </button>
+        <button className="grid place-items-center text-white">
+          <Send className="h-8 w-8 drop-shadow" />
+        </button>
+        <button onClick={() => setSaved((v) => !v)} className="grid place-items-center text-white">
+          <Bookmark className={`h-8 w-8 drop-shadow ${saved ? "fill-white" : ""}`} />
+        </button>
+      </div>
+
+      {/* bottom caption */}
+      <div className="absolute left-4 right-20 bottom-28 text-white">
+        <p className="font-display text-xl font-extrabold drop-shadow">{reel.title}</p>
+        <p className="text-sm mt-1 drop-shadow">{reel.caption}</p>
+        <div className="mt-2 inline-flex items-center gap-1.5 text-xs font-bold bg-white/25 backdrop-blur px-2 py-1 rounded-full">
+          <Music2 className="h-3 w-3" /> <span className={active ? "animate-pulse-soft" : ""}>{reel.song}</span>
+        </div>
+      </div>
+
+      {/* comments sheet */}
+      {showComments && (
+        <div className="absolute inset-x-0 bottom-0 z-30 bg-white rounded-t-3xl p-4 max-h-[60%] flex flex-col animate-in slide-in-from-bottom">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="font-display font-extrabold">Comments · {comments.length}</h3>
+            <button onClick={() => setShowComments(false)} className="text-sm font-bold text-muted-foreground">Close</button>
+          </div>
+          <div className="flex-1 overflow-y-auto space-y-2 pr-1">
+            {comments.map((c, i) => (
+              <div key={i} className="text-sm bg-white/70 rounded-2xl px-3 py-2 border">
+                <span className="font-bold">{c.user}</span> <span className="text-foreground/80">{c.text}</span>
+              </div>
+            ))}
+          </div>
+          <div className="flex gap-2 mt-2">
+            <input
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && submit()}
+              placeholder="Add a comment…"
+              className="flex-1 rounded-full bg-white border-2 border-muted/40 focus:border-primary outline-none px-4 py-2 text-sm font-semibold"
+            />
+            <button onClick={submit} className="rounded-full bg-gradient-primary text-primary-foreground px-4 text-sm font-bold">Post</button>
+          </div>
+        </div>
+      )}
+    </section>
   );
 }

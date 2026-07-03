@@ -24,6 +24,14 @@ export type Onboarding = {
 
 export type Meal = { breakfast: string; lunch: string; dinner: string; protein: number };
 
+export type PregnancyInfo = {
+  monthsMissed: number;
+  symptoms: Record<string, boolean>;
+  startedAt: string; // ISO datetime when onboarding completed
+};
+
+export type AppMode = "period" | "pregnancy";
+
 export type AppState = {
   profile?: Profile;
   onboarding?: Onboarding;
@@ -33,6 +41,9 @@ export type AppState = {
   lastLogDate?: string;
   streakFreezers: number; // up to 2
   loggedIn: boolean;
+  pin?: string; // 4-digit PIN for settings lock
+  mode: AppMode;
+  pregnancy?: PregnancyInfo;
 };
 
 const KEY = "lunaflow_state_v1";
@@ -43,6 +54,7 @@ const empty: AppState = {
   streak: 0,
   streakFreezers: 2,
   loggedIn: false,
+  mode: "period",
 };
 
 export function loadState(): AppState {

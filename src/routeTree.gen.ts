@@ -25,6 +25,7 @@ import { Route as AppExerciseRouteImport } from './routes/app.exercise'
 import { Route as AppEmergencyRouteImport } from './routes/app.emergency'
 import { Route as AppDanceRouteImport } from './routes/app.dance'
 import { Route as AppCalendarRouteImport } from './routes/app.calendar'
+import { Route as AppPregnancyIndexRouteImport } from './routes/app.pregnancy.index'
 
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
@@ -106,6 +107,11 @@ const AppCalendarRoute = AppCalendarRouteImport.update({
   path: '/calendar',
   getParentRoute: () => AppRoute,
 } as any)
+const AppPregnancyIndexRoute = AppPregnancyIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppPregnancyRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -119,11 +125,12 @@ export interface FileRoutesByFullPath {
   '/app/exercise': typeof AppExerciseRoute
   '/app/meals': typeof AppMealsRoute
   '/app/music': typeof AppMusicRoute
-  '/app/pregnancy': typeof AppPregnancyRoute
+  '/app/pregnancy': typeof AppPregnancyRouteWithChildren
   '/app/reels': typeof AppReelsRoute
   '/app/settings': typeof AppSettingsRoute
   '/app/thoughts': typeof AppThoughtsRoute
   '/app/': typeof AppIndexRoute
+  '/app/pregnancy/': typeof AppPregnancyIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -136,11 +143,11 @@ export interface FileRoutesByTo {
   '/app/exercise': typeof AppExerciseRoute
   '/app/meals': typeof AppMealsRoute
   '/app/music': typeof AppMusicRoute
-  '/app/pregnancy': typeof AppPregnancyRoute
   '/app/reels': typeof AppReelsRoute
   '/app/settings': typeof AppSettingsRoute
   '/app/thoughts': typeof AppThoughtsRoute
   '/app': typeof AppIndexRoute
+  '/app/pregnancy': typeof AppPregnancyIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -155,11 +162,12 @@ export interface FileRoutesById {
   '/app/exercise': typeof AppExerciseRoute
   '/app/meals': typeof AppMealsRoute
   '/app/music': typeof AppMusicRoute
-  '/app/pregnancy': typeof AppPregnancyRoute
+  '/app/pregnancy': typeof AppPregnancyRouteWithChildren
   '/app/reels': typeof AppReelsRoute
   '/app/settings': typeof AppSettingsRoute
   '/app/thoughts': typeof AppThoughtsRoute
   '/app/': typeof AppIndexRoute
+  '/app/pregnancy/': typeof AppPregnancyIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -180,6 +188,7 @@ export interface FileRouteTypes {
     | '/app/settings'
     | '/app/thoughts'
     | '/app/'
+    | '/app/pregnancy/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -192,11 +201,11 @@ export interface FileRouteTypes {
     | '/app/exercise'
     | '/app/meals'
     | '/app/music'
-    | '/app/pregnancy'
     | '/app/reels'
     | '/app/settings'
     | '/app/thoughts'
     | '/app'
+    | '/app/pregnancy'
   id:
     | '__root__'
     | '/'
@@ -215,6 +224,7 @@ export interface FileRouteTypes {
     | '/app/settings'
     | '/app/thoughts'
     | '/app/'
+    | '/app/pregnancy/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -339,8 +349,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppCalendarRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/pregnancy/': {
+      id: '/app/pregnancy/'
+      path: '/'
+      fullPath: '/app/pregnancy/'
+      preLoaderRoute: typeof AppPregnancyIndexRouteImport
+      parentRoute: typeof AppPregnancyRoute
+    }
   }
 }
+
+interface AppPregnancyRouteChildren {
+  AppPregnancyIndexRoute: typeof AppPregnancyIndexRoute
+}
+
+const AppPregnancyRouteChildren: AppPregnancyRouteChildren = {
+  AppPregnancyIndexRoute: AppPregnancyIndexRoute,
+}
+
+const AppPregnancyRouteWithChildren = AppPregnancyRoute._addFileChildren(
+  AppPregnancyRouteChildren,
+)
 
 interface AppRouteChildren {
   AppCalendarRoute: typeof AppCalendarRoute
@@ -349,7 +378,7 @@ interface AppRouteChildren {
   AppExerciseRoute: typeof AppExerciseRoute
   AppMealsRoute: typeof AppMealsRoute
   AppMusicRoute: typeof AppMusicRoute
-  AppPregnancyRoute: typeof AppPregnancyRoute
+  AppPregnancyRoute: typeof AppPregnancyRouteWithChildren
   AppReelsRoute: typeof AppReelsRoute
   AppSettingsRoute: typeof AppSettingsRoute
   AppThoughtsRoute: typeof AppThoughtsRoute
@@ -363,7 +392,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppExerciseRoute: AppExerciseRoute,
   AppMealsRoute: AppMealsRoute,
   AppMusicRoute: AppMusicRoute,
-  AppPregnancyRoute: AppPregnancyRoute,
+  AppPregnancyRoute: AppPregnancyRouteWithChildren,
   AppReelsRoute: AppReelsRoute,
   AppSettingsRoute: AppSettingsRoute,
   AppThoughtsRoute: AppThoughtsRoute,

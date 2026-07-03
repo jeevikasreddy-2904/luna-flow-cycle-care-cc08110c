@@ -41,9 +41,13 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     navigate({ to: "/" });
   };
 
+  const mode = loadState().mode;
+  const links = mode === "pregnancy" ? pregnancyLinks : periodLinks;
+
   return (
     <div className="min-h-screen pb-24">
       <MicGate welcome={`Welcome back to Luna Flow. So happy to see you again.`} />
+
 
       <header className="sticky top-0 z-40 glass border-b border-border/50">
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">

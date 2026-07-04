@@ -168,10 +168,12 @@
     color: transparent;
   }
   .glass {
-    background: oklch(1 0 0 / 0.6);
-    backdrop-filter: blur(20px);
-    border: 1px solid oklch(1 0 0 / 0.3);
+    background: rgba(255,255,255,0.65);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255,255,255,0.6);
   }
+  .bg-gradient-hero { background: var(--gradient-hero); }
 }
 
 @keyframes float {

@@ -142,7 +142,7 @@
   }
 
   body {
-    background: var(--gradient-dreamy);
+    background: var(--gradient-hero);
     background-attachment: fixed;
     color: var(--color-foreground);
     min-height: 100vh;

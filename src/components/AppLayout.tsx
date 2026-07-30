@@ -1,5 +1,5 @@
 import { Link, useNavigate, useLocation } from "@tanstack/react-router";
-import { Calendar, Utensils, Dumbbell, Sparkles, Film, LogOut, Moon, Heart, Music2, Music, Settings, Ambulance, Baby } from "lucide-react";
+import { Calendar, Utensils, Dumbbell, Sparkles, Film, LogOut, Moon, Heart, Music2, Music, Settings, Ambulance, Baby, MessageCircleHeart } from "lucide-react";
 import { loadState, updateState } from "@/lib/storage";
 import { speak, clearMicGrant } from "@/lib/voice";
 import { WaterReminder } from "./WaterReminder";
@@ -11,6 +11,7 @@ const periodLinks = [
   { to: "/app/meals", label: "Meals", icon: Utensils },
   { to: "/app/exercise", label: "Yoga", icon: Dumbbell },
   { to: "/app/dance", label: "Dance", icon: Music2 },
+  { to: "/app/chat", label: "Ask Luna", icon: MessageCircleHeart },
   { to: "/app/thoughts", label: "Thoughts", icon: Sparkles },
   { to: "/app/music", label: "Music", icon: Music },
   { to: "/app/reels", label: "Reels", icon: Film },
@@ -23,6 +24,7 @@ const pregnancyLinks = [
   { to: "/app/pregnancy", label: "Baby", icon: Baby },
   { to: "/app/pregnancy/meals", label: "Meals", icon: Utensils },
   { to: "/app/dance", label: "Dance", icon: Music2 },
+  { to: "/app/chat", label: "Ask Luna", icon: MessageCircleHeart },
   { to: "/app/thoughts", label: "Thoughts", icon: Sparkles },
   { to: "/app/music", label: "Music", icon: Music },
   { to: "/app/reels", label: "Reels", icon: Film },

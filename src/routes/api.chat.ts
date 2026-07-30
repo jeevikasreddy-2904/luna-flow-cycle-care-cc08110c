@@ -36,7 +36,7 @@ export const Route = createFileRoute("/api/chat")({
           const result = streamText({
             model: gateway("google/gemini-3.6-flash"),
             system: body.context ? `${SYSTEM}\n\n--- Her Luna Flow data ---\n${body.context}` : SYSTEM,
-            messages: convertToModelMessages(body.messages as UIMessage[]),
+            messages: await convertToModelMessages(body.messages as UIMessage[]),
           });
 
           return result.toUIMessageStreamResponse({

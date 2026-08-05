@@ -100,9 +100,15 @@ function MealsPage() {
           />
         </div>
         <p className="text-xs text-muted-foreground mt-2">
-          Your safe range: <b>{range.min}–{range.max} g/day</b>
+          Daily target: <b>{PROTEIN_TARGET} g minimum</b> · Your safe range: <b>{range.min}–{range.max} g/day</b>
           {range.note && <> · {range.note}</>}
         </p>
+        <p className={`text-xs font-bold mt-1 ${protein >= PROTEIN_TARGET ? "text-emerald-600" : "text-amber-600"}`}>
+          {protein >= PROTEIN_TARGET
+            ? `🎯 ${PROTEIN_TARGET}g target reached (${protein}g so far)`
+            : `${Math.max(0, PROTEIN_TARGET - protein)}g more to hit today's ${PROTEIN_TARGET}g target`}
+        </p>
+
 
         <button
           onClick={save}

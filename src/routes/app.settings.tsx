@@ -37,9 +37,25 @@ function SettingsPage() {
     place: s.profile?.place ?? "",
     phone: s.profile?.phone ?? "",
   });
+  const [theme, setTheme] = useState<"light" | "dark">("light");
+  const [pwForm, setPwForm] = useState({ current: "", next: "" });
+  const [pwMsg, setPwMsg] = useState<string | null>(null);
+
+  useEffect(() => { setTheme(initTheme()); }, []);
+
+  const changePassword = () => {
+    const st = loadState();
+    if (st.password && pwForm.current !== st.password) { setPwMsg("Current password is incorrect."); return; }
+    if (pwForm.next.length < 6) { setPwMsg("New password needs at least 6 characters."); return; }
+    updateState({ password: pwForm.next });
+    setPwForm({ current: "", next: "" });
+    setPwMsg("Password updated 💜");
+    speak("Your password has been updated.");
+  };
 
   const badge = currentBadge(s.streak);
   const currentAvatar = AVATARS.find((a) => a.id === s.profile?.avatar) ?? AVATARS[0];
+
 
   const chooseAvatar = (id: string) => {
     if (!unlocked) { setShowPinModal(s.pin ? "verify" : "create"); return; }

@@ -117,7 +117,70 @@ function SettingsPage() {
         </div>
       </div>
 
+      {/* Journey stats */}
+      <section className="glass shadow-soft rounded-[2rem] p-6">
+        <h2 className="font-display text-xl font-extrabold mb-4">Your journey</h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <JourneyStat label="Days with Luna" value={`${daysUsed()}`} />
+          <JourneyStat label="Current streak" value={`${s.streak} 🔥`} />
+          <JourneyStat label="Highest streak" value={`${s.highestStreak}`} />
+          <JourneyStat label="Activities done" value={`${s.activities}`} />
+        </div>
+      </section>
+
+      {/* Appearance & password */}
+      <section className="glass shadow-soft rounded-[2rem] p-6 space-y-4">
+        <h2 className="font-display text-xl font-extrabold">Preferences</h2>
+        <div className="flex items-center justify-between rounded-2xl bg-white/70 px-4 py-3">
+          <div className="flex items-center gap-3">
+            {theme === "dark" ? <MoonStar className="h-5 w-5 text-primary" /> : <Sun className="h-5 w-5 text-primary" />}
+            <div>
+              <p className="font-bold">{theme === "dark" ? "Night theme" : "Day theme"}</p>
+              <p className="text-xs text-muted-foreground">Soothing dark mode for late-night check-ins.</p>
+            </div>
+          </div>
+          <button
+            onClick={() => setTheme(toggleTheme())}
+            className="rounded-full bg-gradient-primary text-primary-foreground font-bold px-4 py-2 text-sm shadow-soft"
+          >
+            Switch to {theme === "dark" ? "day" : "night"}
+          </button>
+        </div>
+
+        <div className="rounded-2xl bg-white/70 px-4 py-3">
+          <div className="flex items-center gap-3 mb-2">
+            <KeyRound className="h-5 w-5 text-primary" />
+            <p className="font-bold">Change password</p>
+          </div>
+          {!unlocked ? (
+            <p className="text-xs text-muted-foreground">Unlock settings with your PIN to change your password.</p>
+          ) : (
+            <div className="grid md:grid-cols-3 gap-2">
+              <input
+                type="password"
+                value={pwForm.current}
+                onChange={(e) => setPwForm((f) => ({ ...f, current: e.target.value }))}
+                placeholder="Current password"
+                className="rounded-xl bg-white border-2 border-transparent focus:border-primary outline-none px-3 py-2 font-semibold"
+              />
+              <input
+                type="password"
+                value={pwForm.next}
+                onChange={(e) => setPwForm((f) => ({ ...f, next: e.target.value }))}
+                placeholder="New password"
+                className="rounded-xl bg-white border-2 border-transparent focus:border-primary outline-none px-3 py-2 font-semibold"
+              />
+              <button onClick={changePassword} className="rounded-xl bg-gradient-primary text-primary-foreground font-bold px-3 py-2 shadow-soft">
+                Update
+              </button>
+            </div>
+          )}
+          {pwMsg && <p className="text-xs font-bold mt-2 text-primary">{pwMsg}</p>}
+        </div>
+      </section>
+
       {/* Editable details */}
+
       <section className="glass shadow-soft rounded-[2rem] p-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-display text-xl font-extrabold">Personal details</h2>

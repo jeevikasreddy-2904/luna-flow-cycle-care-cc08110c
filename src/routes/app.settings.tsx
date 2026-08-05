@@ -1,9 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { loadState, updateState } from "@/lib/storage";
+import { useEffect, useState } from "react";
+import { loadState, updateState, daysUsed } from "@/lib/storage";
+import { initTheme, toggleTheme } from "@/lib/theme";
 import { speak, BADGES, currentBadge } from "@/lib/voice";
-import { Snowflake, Flame, Check, Pencil, Save, Lock, ShieldCheck, KeyRound } from "lucide-react";
+import { Snowflake, Flame, Check, Pencil, Save, Lock, ShieldCheck, KeyRound, Sun, MoonStar } from "lucide-react";
 import { PinLock } from "@/components/PinLock";
+
 
 export const Route = createFileRoute("/app/settings")({
   head: () => ({ meta: [{ title: "Settings — Luna Flow" }] }),
@@ -35,9 +37,25 @@ function SettingsPage() {
     place: s.profile?.place ?? "",
     phone: s.profile?.phone ?? "",
   });
+  const [theme, setTheme] = useState<"light" | "dark">("light");
+  const [pwForm, setPwForm] = useState({ current: "", next: "" });
+  const [pwMsg, setPwMsg] = useState<string | null>(null);
+
+  useEffect(() => { setTheme(initTheme()); }, []);
+
+  const changePassword = () => {
+    const st = loadState();
+    if (st.password && pwForm.current !== st.password) { setPwMsg("Current password is incorrect."); return; }
+    if (pwForm.next.length < 6) { setPwMsg("New password needs at least 6 characters."); return; }
+    updateState({ password: pwForm.next });
+    setPwForm({ current: "", next: "" });
+    setPwMsg("Password updated 💜");
+    speak("Your password has been updated.");
+  };
 
   const badge = currentBadge(s.streak);
   const currentAvatar = AVATARS.find((a) => a.id === s.profile?.avatar) ?? AVATARS[0];
+
 
   const chooseAvatar = (id: string) => {
     if (!unlocked) { setShowPinModal(s.pin ? "verify" : "create"); return; }
@@ -117,7 +135,70 @@ function SettingsPage() {
         </div>
       </div>
 
+      {/* Journey stats */}
+      <section className="glass shadow-soft rounded-[2rem] p-6">
+        <h2 className="font-display text-xl font-extrabold mb-4">Your journey</h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <JourneyStat label="Days with Luna" value={`${daysUsed()}`} />
+          <JourneyStat label="Current streak" value={`${s.streak} 🔥`} />
+          <JourneyStat label="Highest streak" value={`${s.highestStreak}`} />
+          <JourneyStat label="Activities done" value={`${s.activities}`} />
+        </div>
+      </section>
+
+      {/* Appearance & password */}
+      <section className="glass shadow-soft rounded-[2rem] p-6 space-y-4">
+        <h2 className="font-display text-xl font-extrabold">Preferences</h2>
+        <div className="flex items-center justify-between rounded-2xl bg-white/70 px-4 py-3">
+          <div className="flex items-center gap-3">
+            {theme === "dark" ? <MoonStar className="h-5 w-5 text-primary" /> : <Sun className="h-5 w-5 text-primary" />}
+            <div>
+              <p className="font-bold">{theme === "dark" ? "Night theme" : "Day theme"}</p>
+              <p className="text-xs text-muted-foreground">Soothing dark mode for late-night check-ins.</p>
+            </div>
+          </div>
+          <button
+            onClick={() => setTheme(toggleTheme())}
+            className="rounded-full bg-gradient-primary text-primary-foreground font-bold px-4 py-2 text-sm shadow-soft"
+          >
+            Switch to {theme === "dark" ? "day" : "night"}
+          </button>
+        </div>
+
+        <div className="rounded-2xl bg-white/70 px-4 py-3">
+          <div className="flex items-center gap-3 mb-2">
+            <KeyRound className="h-5 w-5 text-primary" />
+            <p className="font-bold">Change password</p>
+          </div>
+          {!unlocked ? (
+            <p className="text-xs text-muted-foreground">Unlock settings with your PIN to change your password.</p>
+          ) : (
+            <div className="grid md:grid-cols-3 gap-2">
+              <input
+                type="password"
+                value={pwForm.current}
+                onChange={(e) => setPwForm((f) => ({ ...f, current: e.target.value }))}
+                placeholder="Current password"
+                className="rounded-xl bg-white border-2 border-transparent focus:border-primary outline-none px-3 py-2 font-semibold"
+              />
+              <input
+                type="password"
+                value={pwForm.next}
+                onChange={(e) => setPwForm((f) => ({ ...f, next: e.target.value }))}
+                placeholder="New password"
+                className="rounded-xl bg-white border-2 border-transparent focus:border-primary outline-none px-3 py-2 font-semibold"
+              />
+              <button onClick={changePassword} className="rounded-xl bg-gradient-primary text-primary-foreground font-bold px-3 py-2 shadow-soft">
+                Update
+              </button>
+            </div>
+          )}
+          {pwMsg && <p className="text-xs font-bold mt-2 text-primary">{pwMsg}</p>}
+        </div>
+      </section>
+
       {/* Editable details */}
+
       <section className="glass shadow-soft rounded-[2rem] p-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-display text-xl font-extrabold">Personal details</h2>
@@ -269,6 +350,15 @@ function Info({ label, value, full }: { label: string; value?: string; full?: bo
     <div className={`rounded-2xl bg-white/70 p-3 ${full ? "col-span-2" : ""}`}>
       <p className="text-[10px] font-bold text-muted-foreground tracking-widest">{label.toUpperCase()}</p>
       <p className="font-semibold mt-0.5">{value || "—"}</p>
+    </div>
+  );
+}
+
+function JourneyStat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-2xl bg-white/70 p-4 text-center">
+      <p className="font-display font-extrabold text-2xl">{value}</p>
+      <p className="text-[11px] font-bold text-muted-foreground mt-1">{label}</p>
     </div>
   );
 }

@@ -1,13 +1,16 @@
 import { Link, useNavigate, useLocation } from "@tanstack/react-router";
-import { Calendar, Utensils, Dumbbell, Sparkles, Film, LogOut, Moon, Heart, Music2, Music, Settings, Ambulance, Baby, MessageCircleHeart } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Calendar, Utensils, Dumbbell, Sparkles, Film, LogOut, Moon, Heart, Music2, Music, Settings, Ambulance, Baby, MessageCircleHeart, HeartPulse, FileText, Sun } from "lucide-react";
 import { loadState, updateState } from "@/lib/storage";
 import { speak, clearMicGrant } from "@/lib/voice";
+import { initTheme, toggleTheme } from "@/lib/theme";
 import { WaterReminder } from "./WaterReminder";
 import { MicGate } from "./MicGate";
 
 const periodLinks = [
   { to: "/app", label: "Home", icon: Heart },
   { to: "/app/calendar", label: "Cycle", icon: Calendar },
+  { to: "/app/trackers", label: "Track", icon: HeartPulse },
   { to: "/app/meals", label: "Meals", icon: Utensils },
   { to: "/app/exercise", label: "Yoga", icon: Dumbbell },
   { to: "/app/dance", label: "Dance", icon: Music2 },
@@ -15,6 +18,7 @@ const periodLinks = [
   { to: "/app/thoughts", label: "Thoughts", icon: Sparkles },
   { to: "/app/music", label: "Music", icon: Music },
   { to: "/app/reels", label: "Reels", icon: Film },
+  { to: "/app/report", label: "Report", icon: FileText },
   { to: "/app/settings", label: "Me", icon: Settings },
   { to: "/app/emergency", label: "SOS", icon: Ambulance },
 ] as const;
@@ -22,12 +26,14 @@ const periodLinks = [
 const pregnancyLinks = [
   { to: "/app", label: "Home", icon: Heart },
   { to: "/app/pregnancy", label: "Baby", icon: Baby },
+  { to: "/app/trackers", label: "Track", icon: HeartPulse },
   { to: "/app/pregnancy/meals", label: "Meals", icon: Utensils },
   { to: "/app/dance", label: "Dance", icon: Music2 },
   { to: "/app/chat", label: "Ask Luna", icon: MessageCircleHeart },
   { to: "/app/thoughts", label: "Thoughts", icon: Sparkles },
   { to: "/app/music", label: "Music", icon: Music },
   { to: "/app/reels", label: "Reels", icon: Film },
+  { to: "/app/report", label: "Report", icon: FileText },
   { to: "/app/settings", label: "Me", icon: Settings },
   { to: "/app/emergency", label: "SOS", icon: Ambulance },
 ] as const;
@@ -35,6 +41,13 @@ const pregnancyLinks = [
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
   const location = useLocation();
+  const [theme, setTheme] = useState<"light" | "dark">("light");
+  const [mode, setMode] = useState<"period" | "pregnancy">("period");
+
+  useEffect(() => {
+    setTheme(initTheme());
+    setMode(loadState().mode);
+  }, [location.pathname]);
 
   const handleLogout = () => {
     updateState({ loggedIn: false });
@@ -43,8 +56,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     navigate({ to: "/" });
   };
 
-  const mode = loadState().mode;
   const links = mode === "pregnancy" ? pregnancyLinks : periodLinks;
+
 
   return (
     <div className="min-h-screen pb-24">
@@ -59,25 +72,35 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             </div>
             <span className="font-display text-xl font-bold text-gradient">Luna Flow</span>
           </Link>
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-1.5 text-sm font-semibold rounded-full px-3 py-1.5 bg-white/60 hover:bg-white text-foreground transition"
-          >
-            <LogOut className="h-4 w-4" /> Logout
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setTheme(toggleTheme())}
+              aria-label="Toggle dark mode"
+              className="rounded-full p-2 bg-white/60 hover:bg-white text-foreground transition"
+            >
+              {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </button>
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-1.5 text-sm font-semibold rounded-full px-3 py-1.5 bg-white/60 hover:bg-white text-foreground transition"
+            >
+              <LogOut className="h-4 w-4" /> Logout
+            </button>
+          </div>
         </div>
       </header>
 
       <main className="max-w-5xl mx-auto px-4 py-6">{children}</main>
 
-      <nav className="fixed bottom-3 left-1/2 -translate-x-1/2 z-40 glass shadow-soft rounded-full px-2 py-2 flex gap-1 border border-white/60">
+      <nav className="fixed bottom-3 left-1/2 -translate-x-1/2 z-40 glass shadow-soft rounded-full px-2 py-2 flex gap-1 border border-white/60 max-w-[95vw] overflow-x-auto">
+
         {links.map(({ to, label, icon: Icon }) => {
           const active = location.pathname === to || (to !== "/app" && location.pathname.startsWith(to));
           return (
             <Link
               key={to}
               to={to}
-              className={`flex flex-col items-center gap-0.5 rounded-full px-3 py-1.5 text-[10px] font-bold transition ${
+              className={`flex shrink-0 flex-col items-center gap-0.5 rounded-full px-3 py-1.5 text-[10px] font-bold transition ${
                 active ? "bg-gradient-primary text-primary-foreground shadow-soft" : "text-foreground/70 hover:bg-white/60"
               }`}
             >

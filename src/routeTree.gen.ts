@@ -15,8 +15,10 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as AppTrackersRouteImport } from './routes/app.trackers'
 import { Route as AppThoughtsRouteImport } from './routes/app.thoughts'
 import { Route as AppSettingsRouteImport } from './routes/app.settings'
+import { Route as AppReportRouteImport } from './routes/app.report'
 import { Route as AppReelsRouteImport } from './routes/app.reels'
 import { Route as AppPregnancyRouteImport } from './routes/app.pregnancy'
 import { Route as AppMusicRouteImport } from './routes/app.music'
@@ -61,6 +63,11 @@ const AppIndexRoute = AppIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppRoute,
 } as any)
+const AppTrackersRoute = AppTrackersRouteImport.update({
+  id: '/trackers',
+  path: '/trackers',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppThoughtsRoute = AppThoughtsRouteImport.update({
   id: '/thoughts',
   path: '/thoughts',
@@ -69,6 +76,11 @@ const AppThoughtsRoute = AppThoughtsRouteImport.update({
 const AppSettingsRoute = AppSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppReportRoute = AppReportRouteImport.update({
+  id: '/report',
+  path: '/report',
   getParentRoute: () => AppRoute,
 } as any)
 const AppReelsRoute = AppReelsRouteImport.update({
@@ -153,8 +165,10 @@ export interface FileRoutesByFullPath {
   '/app/music': typeof AppMusicRoute
   '/app/pregnancy': typeof AppPregnancyRouteWithChildren
   '/app/reels': typeof AppReelsRoute
+  '/app/report': typeof AppReportRoute
   '/app/settings': typeof AppSettingsRoute
   '/app/thoughts': typeof AppThoughtsRoute
+  '/app/trackers': typeof AppTrackersRoute
   '/app/': typeof AppIndexRoute
   '/app/pregnancy/meals': typeof AppPregnancyMealsRoute
   '/app/pregnancy/onboarding': typeof AppPregnancyOnboardingRoute
@@ -174,8 +188,10 @@ export interface FileRoutesByTo {
   '/app/meals': typeof AppMealsRoute
   '/app/music': typeof AppMusicRoute
   '/app/reels': typeof AppReelsRoute
+  '/app/report': typeof AppReportRoute
   '/app/settings': typeof AppSettingsRoute
   '/app/thoughts': typeof AppThoughtsRoute
+  '/app/trackers': typeof AppTrackersRoute
   '/app': typeof AppIndexRoute
   '/app/pregnancy/meals': typeof AppPregnancyMealsRoute
   '/app/pregnancy/onboarding': typeof AppPregnancyOnboardingRoute
@@ -198,8 +214,10 @@ export interface FileRoutesById {
   '/app/music': typeof AppMusicRoute
   '/app/pregnancy': typeof AppPregnancyRouteWithChildren
   '/app/reels': typeof AppReelsRoute
+  '/app/report': typeof AppReportRoute
   '/app/settings': typeof AppSettingsRoute
   '/app/thoughts': typeof AppThoughtsRoute
+  '/app/trackers': typeof AppTrackersRoute
   '/app/': typeof AppIndexRoute
   '/app/pregnancy/meals': typeof AppPregnancyMealsRoute
   '/app/pregnancy/onboarding': typeof AppPregnancyOnboardingRoute
@@ -223,8 +241,10 @@ export interface FileRouteTypes {
     | '/app/music'
     | '/app/pregnancy'
     | '/app/reels'
+    | '/app/report'
     | '/app/settings'
     | '/app/thoughts'
+    | '/app/trackers'
     | '/app/'
     | '/app/pregnancy/meals'
     | '/app/pregnancy/onboarding'
@@ -244,8 +264,10 @@ export interface FileRouteTypes {
     | '/app/meals'
     | '/app/music'
     | '/app/reels'
+    | '/app/report'
     | '/app/settings'
     | '/app/thoughts'
+    | '/app/trackers'
     | '/app'
     | '/app/pregnancy/meals'
     | '/app/pregnancy/onboarding'
@@ -267,8 +289,10 @@ export interface FileRouteTypes {
     | '/app/music'
     | '/app/pregnancy'
     | '/app/reels'
+    | '/app/report'
     | '/app/settings'
     | '/app/thoughts'
+    | '/app/trackers'
     | '/app/'
     | '/app/pregnancy/meals'
     | '/app/pregnancy/onboarding'
@@ -328,6 +352,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/trackers': {
+      id: '/app/trackers'
+      path: '/trackers'
+      fullPath: '/app/trackers'
+      preLoaderRoute: typeof AppTrackersRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/thoughts': {
       id: '/app/thoughts'
       path: '/thoughts'
@@ -340,6 +371,13 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/app/settings'
       preLoaderRoute: typeof AppSettingsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/report': {
+      id: '/app/report'
+      path: '/report'
+      fullPath: '/app/report'
+      preLoaderRoute: typeof AppReportRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/reels': {
@@ -462,8 +500,10 @@ interface AppRouteChildren {
   AppMusicRoute: typeof AppMusicRoute
   AppPregnancyRoute: typeof AppPregnancyRouteWithChildren
   AppReelsRoute: typeof AppReelsRoute
+  AppReportRoute: typeof AppReportRoute
   AppSettingsRoute: typeof AppSettingsRoute
   AppThoughtsRoute: typeof AppThoughtsRoute
+  AppTrackersRoute: typeof AppTrackersRoute
   AppIndexRoute: typeof AppIndexRoute
 }
 
@@ -477,8 +517,10 @@ const AppRouteChildren: AppRouteChildren = {
   AppMusicRoute: AppMusicRoute,
   AppPregnancyRoute: AppPregnancyRouteWithChildren,
   AppReelsRoute: AppReelsRoute,
+  AppReportRoute: AppReportRoute,
   AppSettingsRoute: AppSettingsRoute,
   AppThoughtsRoute: AppThoughtsRoute,
+  AppTrackersRoute: AppTrackersRoute,
   AppIndexRoute: AppIndexRoute,
 }
 
@@ -495,12 +537,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}

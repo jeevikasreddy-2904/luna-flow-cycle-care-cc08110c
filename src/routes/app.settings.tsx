@@ -353,3 +353,12 @@ function Info({ label, value, full }: { label: string; value?: string; full?: bo
     </div>
   );
 }
+
+function JourneyStat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-2xl bg-white/70 p-4 text-center">
+      <p className="font-display font-extrabold text-2xl">{value}</p>
+      <p className="text-[11px] font-bold text-muted-foreground mt-1">{label}</p>
+    </div>
+  );
+}

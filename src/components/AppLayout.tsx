@@ -72,18 +72,28 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             </div>
             <span className="font-display text-xl font-bold text-gradient">Luna Flow</span>
           </Link>
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-1.5 text-sm font-semibold rounded-full px-3 py-1.5 bg-white/60 hover:bg-white text-foreground transition"
-          >
-            <LogOut className="h-4 w-4" /> Logout
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setTheme(toggleTheme())}
+              aria-label="Toggle dark mode"
+              className="rounded-full p-2 bg-white/60 hover:bg-white text-foreground transition"
+            >
+              {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </button>
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-1.5 text-sm font-semibold rounded-full px-3 py-1.5 bg-white/60 hover:bg-white text-foreground transition"
+            >
+              <LogOut className="h-4 w-4" /> Logout
+            </button>
+          </div>
         </div>
       </header>
 
       <main className="max-w-5xl mx-auto px-4 py-6">{children}</main>
 
-      <nav className="fixed bottom-3 left-1/2 -translate-x-1/2 z-40 glass shadow-soft rounded-full px-2 py-2 flex gap-1 border border-white/60">
+      <nav className="fixed bottom-3 left-1/2 -translate-x-1/2 z-40 glass shadow-soft rounded-full px-2 py-2 flex gap-1 border border-white/60 max-w-[95vw] overflow-x-auto">
+
         {links.map(({ to, label, icon: Icon }) => {
           const active = location.pathname === to || (to !== "/app" && location.pathname.startsWith(to));
           return (

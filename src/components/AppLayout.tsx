@@ -100,7 +100,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             <Link
               key={to}
               to={to}
-              className={`flex flex-col items-center gap-0.5 rounded-full px-3 py-1.5 text-[10px] font-bold transition ${
+              className={`flex shrink-0 flex-col items-center gap-0.5 rounded-full px-3 py-1.5 text-[10px] font-bold transition ${
                 active ? "bg-gradient-primary text-primary-foreground shadow-soft" : "text-foreground/70 hover:bg-white/60"
               }`}
             >

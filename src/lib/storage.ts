@@ -20,6 +20,9 @@ export type Onboarding = {
   onTime: string;
   delays: string;
   early: string;
+  sleepWell?: string;
+  moodSwings?: string;
+  heavyFlow?: string;
 };
 
 export type Meal = { breakfast: string; lunch: string; dinner: string; protein: number };
@@ -32,29 +35,57 @@ export type PregnancyInfo = {
 
 export type AppMode = "period" | "pregnancy";
 
+export type Mood = "great" | "good" | "okay" | "low" | "awful";
+
+export type DayLog = {
+  mood?: Mood;
+  note?: string;
+  water?: number; // glasses
+  sleep?: number; // hours
+  meds?: string[]; // medication ids taken
+};
+
+export type Medication = { id: string; name: string; time: string };
+
+export type Theme = "light" | "dark";
+
 export type AppState = {
   profile?: Profile;
+  password?: string;
   onboarding?: Onboarding;
   periodDates: string[];
   meals: Record<string, Meal>;
   streak: number;
+  highestStreak: number;
   lastLogDate?: string;
   streakFreezers: number; // up to 2
   loggedIn: boolean;
   pin?: string; // 4-digit PIN for settings lock
   mode: AppMode;
   pregnancy?: PregnancyInfo;
+  createdAt?: string; // ISO date of signup
+  activities: number; // count of completed activities (yoga, dance, meals...)
+  days: Record<string, DayLog>; // mood / water / sleep / meds per date
+  medications: Medication[];
+  theme: Theme;
 };
 
 const KEY = "lunaflow_state_v1";
+
+export const PROTEIN_TARGET = 30; // daily minimum target (g) shown on the food tracker
 
 const empty: AppState = {
   periodDates: [],
   meals: {},
   streak: 0,
+  highestStreak: 0,
   streakFreezers: 2,
   loggedIn: false,
   mode: "period",
+  activities: 0,
+  days: {},
+  medications: [],
+  theme: "light",
 };
 
 export function loadState(): AppState {
@@ -63,7 +94,16 @@ export function loadState(): AppState {
     const raw = localStorage.getItem(KEY);
     if (!raw) return empty;
     const parsed = JSON.parse(raw);
-    return { ...empty, ...parsed, streakFreezers: parsed.streakFreezers ?? 2 };
+    return {
+      ...empty,
+      ...parsed,
+      streakFreezers: parsed.streakFreezers ?? 2,
+      highestStreak: parsed.highestStreak ?? parsed.streak ?? 0,
+      activities: parsed.activities ?? 0,
+      days: parsed.days ?? {},
+      medications: parsed.medications ?? [],
+      theme: parsed.theme ?? "light",
+    };
   } catch {
     return empty;
   }
@@ -78,6 +118,32 @@ export function updateState(patch: Partial<AppState>): AppState {
   const next = { ...loadState(), ...patch };
   saveState(next);
   return next;
+}
+
+export function todayKey(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
+export function getDayLog(date = todayKey()): DayLog {
+  return loadState().days[date] ?? {};
+}
+
+export function setDayLog(patch: DayLog, date = todayKey()): AppState {
+  const s = loadState();
+  const days = { ...s.days, [date]: { ...(s.days[date] ?? {}), ...patch } };
+  return updateState({ days });
+}
+
+export function recordActivity(): AppState {
+  const s = loadState();
+  return updateState({ activities: s.activities + 1 });
+}
+
+export function daysUsed(): number {
+  const s = loadState();
+  if (!s.createdAt) return Object.keys(s.meals).length || 1;
+  const start = new Date(s.createdAt).getTime();
+  return Math.max(1, Math.floor((Date.now() - start) / 86400000) + 1);
 }
 
 function daysBetween(a: string, b: string): number {
@@ -112,9 +178,17 @@ export function logMealForToday(meal: Meal): { state: AppState; usedFreezer: num
     }
   }
 
-  const state = updateState({ meals, streak, streakFreezers: freezers, lastLogDate: today });
+  const state = updateState({
+    meals,
+    streak,
+    highestStreak: Math.max(s.highestStreak ?? 0, streak),
+    streakFreezers: freezers,
+    lastLogDate: today,
+    activities: s.activities + (s.lastLogDate === today ? 0 : 1),
+  });
   return { state, usedFreezer };
 }
+
 
 // ---------- Protein database ----------
 // Values are grams of protein for the described serving.

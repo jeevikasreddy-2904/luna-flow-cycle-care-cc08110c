@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { loadState, logMealForToday, estimateProteinFromText, safeProteinRange } from "@/lib/storage";
+import { loadState, logMealForToday, estimateProteinFromText, safeProteinRange, PROTEIN_TARGET } from "@/lib/storage";
 import { Flame, Sparkles, AlertTriangle, ShieldCheck, Snowflake } from "lucide-react";
 import { speak } from "@/lib/voice";
 

@@ -1,25 +1,40 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { Play, Pause, Headphones, X, Volume2, VolumeX, SkipBack, SkipForward } from "lucide-react";
+import { Play, Pause, Headphones, X, Volume2, VolumeX, SkipBack, SkipForward, BadgeCheck } from "lucide-react";
 
 export const Route = createFileRoute("/app/music")({
-  head: () => ({ meta: [{ title: "Music — Luna Flow" }] }),
+  head: () => ({
+    meta: [
+      { title: "Music — Luna Flow" },
+      { name: "description", content: "Royalty-free calming tracks for cramps, sleep and mood, sorted by language." },
+      { property: "og:title", content: "Music — Luna Flow" },
+      { property: "og:description", content: "Royalty-free calming tracks for cramps, sleep and mood, sorted by language." },
+    ],
+  }),
   component: MusicPage,
 });
 
+const LANGUAGES = ["All", "Instrumental", "Hindi", "Telugu", "Tamil", "Kannada", "Malayalam"] as const;
+type Language = (typeof LANGUAGES)[number];
+
 const tracks = [
-  { id: "t1", title: "Soft Bloom",     mood: "Calm 🌸",       gradient: "bg-gradient-sunrise", emoji: "🌸",  src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" },
-  { id: "t2", title: "Moonlit Cycle",  mood: "Dreamy 🌙",     gradient: "bg-gradient-dreamy",  emoji: "🌙",  src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" },
-  { id: "t3", title: "Warm Embrace",   mood: "Cozy 🤍",       gradient: "bg-gradient-primary", emoji: "🤍",  src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" },
-  { id: "t4", title: "Dance Drift",    mood: "Energising 💃🏽", gradient: "bg-gradient-meadow",  emoji: "💃🏽", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3" },
-  { id: "t5", title: "Cramp Soother",  mood: "Healing 💖",    gradient: "bg-gradient-sunrise", emoji: "💖",  src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3" },
-  { id: "t6", title: "Bloom Beat",     mood: "Uplift ✨",      gradient: "bg-gradient-meadow",  emoji: "✨",  src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3" },
+  { id: "t1", title: "Soft Bloom",     mood: "Calm 🌸",       lang: "Instrumental", gradient: "bg-gradient-sunrise", emoji: "🌸",  src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" },
+  { id: "t2", title: "Moonlit Cycle",  mood: "Dreamy 🌙",     lang: "Instrumental", gradient: "bg-gradient-dreamy",  emoji: "🌙",  src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" },
+  { id: "t3", title: "Warm Embrace",   mood: "Cozy 🤍",       lang: "Hindi",        gradient: "bg-gradient-primary", emoji: "🤍",  src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" },
+  { id: "t4", title: "Dance Drift",    mood: "Energising 💃🏽", lang: "Telugu",       gradient: "bg-gradient-meadow",  emoji: "💃🏽", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3" },
+  { id: "t5", title: "Cramp Soother",  mood: "Healing 💖",    lang: "Tamil",        gradient: "bg-gradient-sunrise", emoji: "💖",  src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3" },
+  { id: "t6", title: "Bloom Beat",     mood: "Uplift ✨",      lang: "Kannada",      gradient: "bg-gradient-meadow",  emoji: "✨",  src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3" },
+  { id: "t7", title: "Coconut Breeze", mood: "Soothing 🌴",   lang: "Malayalam",    gradient: "bg-gradient-dreamy",  emoji: "🌴",  src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3" },
+  { id: "t8", title: "Night Lullaby",  mood: "Sleep 😴",      lang: "Hindi",        gradient: "bg-gradient-primary", emoji: "😴",  src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3" },
 ];
 
 type Track = typeof tracks[number];
 
 function MusicPage() {
   const [openIdx, setOpenIdx] = useState<number | null>(null);
+  const [lang, setLang] = useState<Language>("All");
+
+  const list = lang === "All" ? tracks : tracks.filter((t) => t.lang === lang);
 
   return (
     <div className="space-y-6">
@@ -32,13 +47,30 @@ function MusicPage() {
           Put on your headphones <Headphones className="h-7 w-7" />
         </h1>
         <p className="text-foreground/80 mt-1">Tap a track for a full-screen listening moment.</p>
+        <p className="mt-2 inline-flex items-center gap-1.5 text-xs font-bold rounded-full bg-white/70 px-3 py-1">
+          <BadgeCheck className="h-3.5 w-3.5 text-primary" /> Royalty-free & original audio only
+        </p>
+      </div>
+
+      <div className="flex gap-2 overflow-x-auto pb-1">
+        {LANGUAGES.map((l) => (
+          <button
+            key={l}
+            onClick={() => setLang(l)}
+            className={`shrink-0 rounded-full px-4 py-2 text-sm font-bold transition ${
+              lang === l ? "bg-gradient-primary text-primary-foreground shadow-soft" : "bg-white/70 hover:bg-white text-foreground"
+            }`}
+          >
+            {l}
+          </button>
+        ))}
       </div>
 
       <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
-        {tracks.map((t, i) => (
+        {list.map((t) => (
           <button
             key={t.id}
-            onClick={() => setOpenIdx(i)}
+            onClick={() => setOpenIdx(tracks.indexOf(t))}
             className="rounded-3xl overflow-hidden glass shadow-soft hover:shadow-glow transition text-left"
           >
             <div className={`${t.gradient} aspect-square grid place-items-center text-7xl relative`}>
@@ -46,8 +78,8 @@ function MusicPage() {
               <span className="absolute bottom-3 right-3 h-12 w-12 rounded-full bg-white/90 grid place-items-center shadow-glow">
                 <Play className="h-5 w-5 fill-foreground text-foreground" />
               </span>
-              <span className="absolute top-3 left-3 h-8 w-8 rounded-full bg-white/85 grid place-items-center shadow-soft">
-                <Headphones className="h-4 w-4" />
+              <span className="absolute top-3 left-3 rounded-full bg-white/85 px-2.5 py-1 text-[10px] font-bold shadow-soft">
+                {t.lang}
               </span>
             </div>
             <div className="p-4">
@@ -57,6 +89,7 @@ function MusicPage() {
           </button>
         ))}
       </div>
+
 
       {openIdx !== null && (
         <NowPlaying

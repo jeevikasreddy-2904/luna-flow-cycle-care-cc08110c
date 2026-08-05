@@ -1,9 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { loadState, updateState } from "@/lib/storage";
+import { useEffect, useState } from "react";
+import { loadState, updateState, daysUsed } from "@/lib/storage";
+import { initTheme, toggleTheme } from "@/lib/theme";
 import { speak, BADGES, currentBadge } from "@/lib/voice";
-import { Snowflake, Flame, Check, Pencil, Save, Lock, ShieldCheck, KeyRound } from "lucide-react";
+import { Snowflake, Flame, Check, Pencil, Save, Lock, ShieldCheck, KeyRound, Sun, MoonStar } from "lucide-react";
 import { PinLock } from "@/components/PinLock";
+
 
 export const Route = createFileRoute("/app/settings")({
   head: () => ({ meta: [{ title: "Settings — Luna Flow" }] }),

@@ -1,13 +1,16 @@
 import { Link, useNavigate, useLocation } from "@tanstack/react-router";
-import { Calendar, Utensils, Dumbbell, Sparkles, Film, LogOut, Moon, Heart, Music2, Music, Settings, Ambulance, Baby, MessageCircleHeart } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Calendar, Utensils, Dumbbell, Sparkles, Film, LogOut, Moon, Heart, Music2, Music, Settings, Ambulance, Baby, MessageCircleHeart, HeartPulse, FileText, Sun } from "lucide-react";
 import { loadState, updateState } from "@/lib/storage";
 import { speak, clearMicGrant } from "@/lib/voice";
+import { initTheme, toggleTheme } from "@/lib/theme";
 import { WaterReminder } from "./WaterReminder";
 import { MicGate } from "./MicGate";
 
 const periodLinks = [
   { to: "/app", label: "Home", icon: Heart },
   { to: "/app/calendar", label: "Cycle", icon: Calendar },
+  { to: "/app/trackers", label: "Track", icon: HeartPulse },
   { to: "/app/meals", label: "Meals", icon: Utensils },
   { to: "/app/exercise", label: "Yoga", icon: Dumbbell },
   { to: "/app/dance", label: "Dance", icon: Music2 },
@@ -15,6 +18,7 @@ const periodLinks = [
   { to: "/app/thoughts", label: "Thoughts", icon: Sparkles },
   { to: "/app/music", label: "Music", icon: Music },
   { to: "/app/reels", label: "Reels", icon: Film },
+  { to: "/app/report", label: "Report", icon: FileText },
   { to: "/app/settings", label: "Me", icon: Settings },
   { to: "/app/emergency", label: "SOS", icon: Ambulance },
 ] as const;
@@ -22,12 +26,14 @@ const periodLinks = [
 const pregnancyLinks = [
   { to: "/app", label: "Home", icon: Heart },
   { to: "/app/pregnancy", label: "Baby", icon: Baby },
+  { to: "/app/trackers", label: "Track", icon: HeartPulse },
   { to: "/app/pregnancy/meals", label: "Meals", icon: Utensils },
   { to: "/app/dance", label: "Dance", icon: Music2 },
   { to: "/app/chat", label: "Ask Luna", icon: MessageCircleHeart },
   { to: "/app/thoughts", label: "Thoughts", icon: Sparkles },
   { to: "/app/music", label: "Music", icon: Music },
   { to: "/app/reels", label: "Reels", icon: Film },
+  { to: "/app/report", label: "Report", icon: FileText },
   { to: "/app/settings", label: "Me", icon: Settings },
   { to: "/app/emergency", label: "SOS", icon: Ambulance },
 ] as const;
@@ -35,6 +41,13 @@ const pregnancyLinks = [
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
   const location = useLocation();
+  const [theme, setTheme] = useState<"light" | "dark">("light");
+  const [mode, setMode] = useState<"period" | "pregnancy">("period");
+
+  useEffect(() => {
+    setTheme(initTheme());
+    setMode(loadState().mode);
+  }, [location.pathname]);
 
   const handleLogout = () => {
     updateState({ loggedIn: false });
@@ -43,8 +56,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     navigate({ to: "/" });
   };
 
-  const mode = loadState().mode;
   const links = mode === "pregnancy" ? pregnancyLinks : periodLinks;
+
 
   return (
     <div className="min-h-screen pb-24">
